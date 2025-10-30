@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    .main-body {
+      background-color: #ffffff;
+      width: 100%;
+      max-width: 600px;
+      margin: 20px auto;
+      border: 1px solid #dddddd;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .header-container {
+      background-color: #1D4ED8;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .header-container h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .confirmation-section {
+      padding: 20px;
+    }
+
+    .confirmation-text {
+      margin-bottom: 20px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .confirmation-list {
+      list-style: none;
+      /* Remove default list image */
+      margin: 30px 0 0 0;
+      padding: 0;
+    }
+
+    .confirmation-list li {
+      position: relative;
+      padding-left: 20px;
+      /* Space for the checkmark */
+      margin-bottom: 10px;
+    }
+
+    .confirmation-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 3px;
+      /* Adjust to align vertically */
+      width: 16px;
+      /* Desired width */
+      height: 16px;
+      /* Desired height */
+      background-image: url("https://epseth.com/gojo/booking/assets/check-mark.png");
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+
+    .details-container {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    .details-container th,
+    .details-container td {
+      padding: 10px;
+      border: 1px solid #dddddd;
+      text-align: left;
+    }
+
+    .details-container th {
+      background-color: #f4f4f4;
+    }
+
+    .footer {
+      background-color: #f4f4f4;
+      text-align: center;
+      padding: 10px;
+    }
+
+    .footer p {
+      margin: 0;
+      font-size: 12px;
+      color: #777777;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      margin-top: 20px;
+      background-color: #1D4ED8;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="main-body">
+    <div class="header-container">
+      <h1>Gojobooking.com</h1>
+    </div>
+    <div class="confirmation-section">
+      <center><img src="https://epseth.com/gojo/booking/assets/check.png" /></center>
+      <p class="confirmation-text">
+        Thank you {{user_name}}, your booking with {{hotel_name}} is now confirmed.
+      </p>
+      <ul class="confirmation-list">
+        <li>{{hotel_name}} is expecting you on {{checkIn}}.</li>
+        {{!-- <li>Your payment will be handled by {{hotel_name}},</li> --}}
+        {{!-- <li>Make changes to your booking or ask the property a question in just a few clicks.</li> --}}
+      </ul>
+      <h3>{{hotel_name}}</h3>
+      <p>{{hotel_address}}</p>
+      <p><b>Phone:</b>
+      <ul>
+        {{#each hotel_phone}}
+        <li>{{this}}</li>
+        {{/each}}
+      </ul>
+      </p>
+      <p><b>Email:</b>
+      <ul>
+        {{#each hote_email}}
+        <li>{{this}}</li>
+        {{/each}}
+      </ul>
+      </p>
+    </div>
+    <table class="details-container">
+      <tr>
+        <th>Your Reservation</th>
+        <td>{{reservation_info}}, {{total_room_booked}} room[s]</td>
+      </tr>
+      <tr>
+        <th>Check-in</th>
+        <td>{{checkIn}}</td>
+      </tr>
+      <tr>
+        <th>Check-out</th>
+        <td>{{checkOut}}</td>
+      </tr>
+      {{!-- <tr>
+        <th>Payment</th>
+        <td>You will be charged the total price at any time</td>
+      </tr> --}}
+      {{#if payment_detail}}
+      <tr>
+        <th>Reference</th>
+        <td>{{uppercase payment_detail.uniqueId}}</td>
+      </tr>
+      {{/if}}
+    </table>
+    {{!-- <a href="#" class="btn">Cancel your booking</a> --}}
+    {{!-- <p style="text-align: center; font-size: medium; color: darkblue;">
+      This booking is non-refundable. Changing the dates of your stay is not possible.
+    </p> --}}
+  </div>
+  <div class="footer">
+    <p>&copy; {{copyRightYear}} Gojobooking.com. All rights reserved.</p>
+  </div>
+</body>
+
+</html>
