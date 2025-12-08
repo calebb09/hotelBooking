@@ -2,7 +2,7 @@
 
 const {stubFalse} = require("lodash");
 const mongoose = require("mongoose");
-const paginator = require("mongoose-paginate"); // unnecessary fields
+const paginator = require("mongoose-paginate-v2"); // unnecessary fields
 var Schema = mongoose.Schema;
 var validateEmail = function (emailAddress) {
   var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;

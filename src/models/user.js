@@ -2,7 +2,7 @@
 var mongoose = require("mongoose");
 var bcrypt = require("bcryptjs");
 var config = require("../../config");
-var paginate = require("mongoose-paginate");
+var paginate = require("mongoose-paginate-v2");
 var now = new Date();
 var Schema = mongoose.Schema;
 var validateEmail = function (email) {

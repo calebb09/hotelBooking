@@ -1,7 +1,7 @@
 "use strict";
 
 const mongoose = require("mongoose");
-const paginator = require("mongoose-paginate"); // unnecessary fields
+const paginator = require("mongoose-paginate-v2"); // unnecessary fields
 var Schema = mongoose.Schema;
 const now = Date.now;
 var roomSchema = new Schema(

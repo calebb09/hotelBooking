@@ -1,6 +1,6 @@
 "use strict";
 const mongoose = require("mongoose");
-const paginator = require("mongoose-paginate");
+const paginator = require("mongoose-paginate-v2");
 const Schema = mongoose.Schema;
 //
 // New Admin Schema Instance

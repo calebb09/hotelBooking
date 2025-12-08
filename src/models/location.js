@@ -1,6 +1,6 @@
 "use strict";
 const mongoose = require("mongoose");
-const paginator = require("mongoose-paginate");
+const paginator = require("mongoose-paginate-v2");
 var Schema = mongoose.Schema;
 // New Category Schema Instance
 var LocationSchema = new Schema(
