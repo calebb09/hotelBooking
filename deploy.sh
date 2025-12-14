@@ -6,7 +6,8 @@ echo "🔄 Pulling latest code..."
 git pull
 
 echo "📦 Installing dependencies..."
-npm install --production
+npm install --omit=dev
+# npm install --production
 
 echo "🔧 Building..."
 npm run build 2>/dev/null || echo "No build step."
