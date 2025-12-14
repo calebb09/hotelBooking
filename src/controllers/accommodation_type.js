@@ -30,7 +30,7 @@ exports.validateAccommodationType = function validateAccommodationType(
           res.status(404).json({
             error: true,
             status: 404,
-            msg: "AccommodationType _id " + id + " not found",
+            msg: "AccommodationType _id " + id + " never found",
           });
         }
       }
