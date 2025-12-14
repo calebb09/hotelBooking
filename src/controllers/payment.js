@@ -245,6 +245,7 @@ exports.directPay = async (req, res, next) => {
     let body = req.body;
     let create_query = {};
     let errors = [];
+    let hotelBooking = [];
     let entry = {};
     let price_query = {};
     let userId = null;
