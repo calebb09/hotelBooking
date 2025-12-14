@@ -2,6 +2,13 @@ const Transaction = require("../models/transaction");
 const Wallet = require("../models/wallet");
 const Profit = require("../models/profit");
 const refund_response = [];
+// define what a, b, c, d, e, f are in the function parameters
+// a: original transaction
+// b: new user wallet balance after refund
+// c: new client wallet balance after refund
+// d: profit record data
+// e: amount to deduct from client
+// f: client id
 exports = module.exports = async function (a, b, c, d, e, f) {
   await Transaction.create({
     user_information: {
