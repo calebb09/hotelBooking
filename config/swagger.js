@@ -7,9 +7,9 @@ const swaggerOptions = {
       description: "GOJO BOOKING API DOCUMENTATION",
     },
     servers: [
-      {url: "https://localhost:4000/v1/api"},
-      {url: "https://localhost:4000/v2/api"},
-      {url: "https://localhost:4000/v3/api"},
+      {url: "https://138.199.225.171/backend/v1/api"},
+      {url: "https://138.199.225.171/backend/v2/api"},
+      {url: "https://138.199.225.171/backend/v3/api"},
     ],
     components: {
       securitySchemes: {
