@@ -2,9 +2,24 @@ const swaggerOptions = {
   definition: {
     openapi: "3.0.3",
     info: {
-      title: "gojobooking.com DOCS - An open API for ET-Booking",
+      title: "OPEN API DOCS - for Triplaye-Booking",
       version: "1.0.11",
-      description: "GOJO BOOKING API DOCUMENTATION",
+      description: `Triplaye Booking API is a RESTful service designed to power booking and reservation
+                    workflows for web and mobile platforms.
+
+                    The API enables:
+                    • User authentication and profile management  
+                    • Resource listing and availability management  
+                    • Booking creation, updates, and cancellations  
+                    • Secure payment processing and transaction tracking  
+                    • Notifications and real-time updates  
+                    • Admin and partner-level operations  
+
+                    All endpoints follow REST standards and return JSON responses.
+                    Authentication is handled using Bearer tokens (JWT).
+
+                    This documentation is intended for frontend developers, mobile developers,
+                    and third-party integrators who want to build on top of the GOJO Booking platform.`,
     },
     servers: [
       {url: "https://138.199.225.171/backend/v1/api"},
