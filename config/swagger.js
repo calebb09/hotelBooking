@@ -20,7 +20,7 @@ const swaggerOptions = {
       },
     },
   },
-  apis: ["./routes/**/*.js"], // pick up JSDoc comments from all route files
+  apis: ["./src/routes/**/*.js"], // pick up JSDoc comments from all route files
 };
 
 module.exports = swaggerOptions;
