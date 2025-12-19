@@ -33,7 +33,10 @@ var accommodationSchema = new Schema(
         type: String,
       },
     },
-    name: {type: String, required: true},
+    name: {
+      en: {type: String, required: true, trim: true},
+      am: {type: String, trim: true},
+    },
     address: {
       street_address: {type: String, required: true},
       phoneAddress: [

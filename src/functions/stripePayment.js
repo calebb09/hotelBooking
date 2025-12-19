@@ -138,98 +138,82 @@ exports = module.exports.directPay = async function (
                     } else {
                       current_balance = transaction_doc.amount;
                     }
-                    reason === "recharge"
-                      ? await BalanceDal.create({
-                          user_information: user_info.user_information,
-                          balance: current_balance,
-                          transaction: transaction_doc.id,
-                        })
-                          .then((balance_document) => {
-                            balance_document
-                              ? output.push("good", "succeeded", 201)
-                              : output.push("bad", "ooops", 400);
+
+                    await ProfitMdl.create({
+                      user_information: {
+                        user_type: userType,
+                        user: userId,
+                      },
+                      amount: commissionPayment,
+                      transaction: transaction_doc.id,
+                      reason: "Booking a room",
+                      status: "available",
+                    })
+                      .then(async (profit_data) => {
+                        if (profit_data) {
+                          /** transfer the money to hotel wallet */
+                          await TransactionDal.create({
+                            user_information: {
+                              user_type: "client",
+                              client: roomInfo[0].subRoomType.accommodation,
+                            },
+                            transaction_status: "transfer",
+                            amount: hotelShare,
+                            reason: "room booked from customer " + full_name,
+                            currency_type: "USD",
+                            action_type: "added",
                           })
-                          .catch((err) => {
-                            output.push(err, "code error", 500);
-                          })
-                      : /** transfer the rest as a profit */
-                        await ProfitMdl.create({
-                          user_information: {
-                            user_type: userType,
-                            user: userId,
-                          },
-                          amount: commissionPayment,
-                          transaction: transaction_doc.id,
-                          reason: "Booking a room",
-                          status: "available",
-                        })
-                          .then(async (profit_data) => {
-                            if (profit_data) {
-                              /** transfer the money to hotel wallet */
-                              await TransactionDal.create({
+                            .then(async (transactions_doc) => {
+                              let currentBalance = 0;
+                              let prev_balance = await BalanceDal.find({
+                                "user_information.client":
+                                  roomInfo[0].subRoomType.accommodation,
+                              }).sort({_id: -1});
+                              if (prev_balance.length === 0) {
+                                currentBalance = hotelShare;
+                              } else {
+                                currentBalance =
+                                  hotelShare + prev_balance[0].balance;
+                              }
+                              await BalanceDal.create({
                                 user_information: {
                                   user_type: "client",
                                   client: roomInfo[0].subRoomType.accommodation,
                                 },
-                                transaction_status: "transfer",
-                                amount: hotelShare,
-                                reason:
-                                  "room booked from customer " + full_name,
-                                currency_type: "USD",
-                                action_type: "added",
+                                balance: currentBalance,
+                                transaction: transactions_doc.id,
                               })
-                                .then(async (transactions_doc) => {
-                                  let currentBalance = 0;
-                                  let prev_balance = await BalanceDal.find({
-                                    "user_information.client":
-                                      roomInfo[0].subRoomType.accommodation,
-                                  }).sort({_id: -1});
-                                  if (prev_balance.length === 0) {
-                                    currentBalance = hotelShare;
+                                .then((balance_doc) => {
+                                  if (balance_doc) {
+                                    output.push(
+                                      "ok",
+                                      balance_doc,
+                                      201,
+                                      transaction_doc
+                                    );
                                   } else {
-                                    currentBalance =
-                                      hotelShare + prev_balance[0].balance;
+                                    output.push(
+                                      "bad",
+                                      "balance not saved",
+                                      400
+                                    );
                                   }
-                                  await BalanceDal.create({
-                                    user_information: {
-                                      user_type: "client",
-                                      client:
-                                        roomInfo[0].subRoomType.accommodation,
-                                    },
-                                    balance: currentBalance,
-                                    transaction: transactions_doc.id,
-                                  })
-                                    .then((balance_doc) => {
-                                      if (balance_doc) {
-                                        output.push(
-                                          "ok",
-                                          balance_doc,
-                                          201,
-                                          transaction_doc
-                                        );
-                                      } else {
-                                        output.push(
-                                          "bad",
-                                          "balance not saved",
-                                          400
-                                        );
-                                      }
-                                    })
-                                    .catch((err) => {
-                                      output.push("bad", err, 500);
-                                    });
                                 })
                                 .catch((err) => {
                                   output.push("bad", err, 500);
                                 });
-                              output.push("ok", profit_data, 201);
-                            } else {
-                              output.push("bad", "profit not saved", 400);
-                            }
-                          })
-                          .catch((err) => {
-                            output.push("bad", err, 500);
-                          });
+                            })
+                            .catch((err) => {
+                              output.push("bad", err, 500);
+                            });
+                          output.push("ok", profit_data, 201);
+                        } else {
+                          output.push("bad", "profit not saved", 400);
+                        }
+                      })
+                      .catch((err) => {
+                        output.push("bad", err, 500);
+                      });
                   });
               })
               .catch((err) => {

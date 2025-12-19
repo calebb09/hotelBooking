@@ -616,11 +616,9 @@ exports.uploadSpreadSheet = async (req, res) => {
       });
       rawJson = rows;
     } else if (ext === ".xls") {
-      return res
-        .status(400)
-        .json({
-          message: "Legacy .xls is not supported. Please upload .csv or .xlsx.",
-        });
+      return res.status(400).json({
+        message: "Legacy .xls is not supported. Please upload .csv or .xlsx.",
+      });
     } else {
       return res.status(400).json({message: "Unsupported file format."});
     }
@@ -814,6 +812,9 @@ exports.nearBy = async (req, res, next) => {
             $maxDistance: maxDistance,
           },
         },
+        lodging_type: req.body.lodging_type
+          ? req.body.lodging_type
+          : {$exists: true},
       },
       queryOpts,
       (err, accommodations) => {
