@@ -454,6 +454,7 @@ router.post(
  *                 $ref: '#/components/schemas/BookingError'
  */
 router.post("/filter", BookingController.searchRooms);
+router.post("/search/for-one-guest", BookingController.searchforOneGuest);
 /**
  * @swagger
  * /booking/{did}/rate:

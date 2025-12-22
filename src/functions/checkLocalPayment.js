@@ -1,8 +1,7 @@
 const chapaStore = require("../models/chapaStore");
-const {verifyPayment, currencyConvert} = require("../services/chapa");
-const {totalRoomPrice, totalCommission} = require("../functions/calculation");
+const {verifyPayment} = require("../services/chapa");
+
 const createTransaction = require("../utils/wallet");
-const hotelTransaction = require("../utils/hotelTransaction");
 const Transaction = require("../models/transaction");
 const Accommodation = require("../models/accommodation");
 const Client = require("../models/client");
@@ -80,33 +79,33 @@ async function processBooking(item, paymentData) {
   if (!booking)
     return console.warn(`Booking not found for tx_ref: ${item.tx_ref}`);
 
-  const transaction = await createTransaction(
-    totalAmount,
-    "deducted",
-    item.uuid,
-    "transfer",
-    "payment",
-    paymentData.data.charge,
-    "directPay"
-  );
-  console.log(transaction);
-  if (transaction.status !== "success")
-    return console.error("Failed to create deduction transaction");
+  // const transaction = await createTransaction(
+  //   totalAmount,
+  //   "deducted",
+  //   item.uuid,
+  //   "transfer",
+  //   "payment",
+  //   paymentData.data.charge,
+  //   "directPay"
+  // );
+  // console.log(transaction);
+  // if (transaction.status !== "success")
+  //   return console.error("Failed to create deduction transaction");
 
-  // Calculate financials
+  // // Calculate financials
 
-  const hotelTrans = await hotelTransaction(
-    item.chargeInfo.hotelShare,
-    "added",
-    booking.accommodation,
-    "transfer",
-    transaction.transaction.uniqueId,
-    "client booked room",
-    "ETB"
-  );
+  // const hotelTrans = await hotelTransaction(
+  //   item.chargeInfo.hotelShare,
+  //   "added",
+  //   booking.accommodation,
+  //   "transfer",
+  //   transaction.transaction.uniqueId,
+  //   "client booked room",
+  //   "ETB"
+  // );
 
-  if (hotelTrans.status !== "success")
-    return console.error("Failed to create hotel transaction");
+  // if (hotelTrans.status !== "success")
+  //   return console.error("Failed to create hotel transaction");
 
   const updatedBooking = await Booking.findByIdAndUpdate(
     booking.id,
@@ -114,7 +113,7 @@ async function processBooking(item, paymentData) {
       is_paid: true,
       tx_ref: paymentData.data.reference,
       status: "reserved",
-      transaction: transaction.transaction.id,
+      // transaction: transaction.transaction.id,
       updated_at: new Date(),
     },
     {new: true}
@@ -124,7 +123,7 @@ async function processBooking(item, paymentData) {
       {_id: updatedBooking.room[i]},
       {
         $addToSet: {booking_calendar: updatedBooking.id},
-        status: "reserved",
+        // status: "reserved",
         updated_at: new Date(),
       },
       (err, room_doc) => {
@@ -141,7 +140,7 @@ async function processBooking(item, paymentData) {
     item.id,
     {
       status: "success",
-      transaction: transaction.transaction.id,
+      // transaction: transaction.transaction.id,
       chapa_ref: paymentData.data.reference,
       updated_at: new Date(),
       chargeInfo: {
@@ -165,7 +164,7 @@ async function processBooking(item, paymentData) {
   let createQry = {
     currency_type: "ETB",
     amount: item.chargeInfo.gojoShare,
-    transaction: transaction.transaction.id,
+    // transaction: transaction.transaction.id,
     reason: "Booking a room",
     uniqueId: transaction.transaction.uniqueId,
     status: "available",

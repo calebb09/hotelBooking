@@ -62,7 +62,7 @@ const chapaDirectPay = async (
     let hotelShareBirr = hotelShare * rate;
 
     const saveCharge = await createPayment(
-      finalPayment,
+      gojoShareBirr, // used to be finalpayment but not the logic is about the commission payment not the room price payment
       "ETB",
       email,
       firstName,
