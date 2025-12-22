@@ -23,196 +23,133 @@ exports = module.exports.directPay = async function (
   discount,
   bookingDetail
 ) {
-  let output = [];
-  let {commissionPayment, hotelShare, totalPayment, amount} = 0;
-  if (reason === "recharge") {
-    amount = amounts;
-    hotelShare = payment_amount;
-    totalPayment = payment_amount;
-    recharge_boolean = true;
-    transaction_status = "recharge";
-  } else {
-    // the game is here
-    //how many nights to stay
-    const msPerDay = 1000 * 60 * 60 * 24;
-    const diffDays = Math.round(
-      (new Date(bookingDetail.checkOut) - new Date(bookingDetail.checkIn)) /
-        msPerDay
-    );
+  try {
+    let output = [];
+    let {commissionPayment, hotelShare, totalPayment, amount} = 0;
+    if (reason === "recharge") {
+      amount = amounts;
+      // hotelShare = payment_amount;
+      totalPayment = payment_amount;
+      recharge_boolean = true;
+      transaction_status = "recharge";
+    } else {
+      // the game is here
+      //how many nights to stay
+      const msPerDay = 1000 * 60 * 60 * 24;
+      const diffDays = Math.round(
+        (new Date(bookingDetail.checkOut) - new Date(bookingDetail.checkIn)) /
+          msPerDay
+      );
 
-    // Total extra charges
-    //////////////////////////////////////////////////////||||||||||||||||||
-    recharge_boolean = false;
-    transaction_status = "payment";
-    hotelShare = totalRoomPrice(roomInfo, bookingDetail) * diffDays;
-    commissionPayment = totalCommission(roomInfo, discount) * diffDays;
-    console.log("discount " + discount);
-    totalPayment = commissionPayment;
-    // if (discount === "20%") {
-    //   totalPayment =
-    //     ifonlydiscountdirectPay(roomInfo, bookingDetail) * diffDays;
-    // } else {
-    //   totalPayment =
-    //     calculateTotalPriceifdiscountLevelhaveValuedirectPay(
-    //       roomInfo,
-    //       discount
-    //     ) * diffDays;
-    // }
-    amount = Math.round(totalPayment * 100);
-  }
+      // Total extra charges
+      //////////////////////////////////////////////////////||||||||||||||||||
+      recharge_boolean = false;
+      transaction_status = "payment";
+      // hotelShare = totalRoomPrice(roomInfo, bookingDetail) * diffDays;
+      commissionPayment = totalCommission(roomInfo, discount) * diffDays;
+      console.log("discount " + discount);
+      totalPayment = commissionPayment;
+      // if (discount === "20%") {
+      //   totalPayment =
+      //     ifonlydiscountdirectPay(roomInfo, bookingDetail) * diffDays;
+      // } else {
+      //   totalPayment =
+      //     calculateTotalPriceifdiscountLevelhaveValuedirectPay(
+      //       roomInfo,
+      //       discount
+      //     ) * diffDays;
+      // }
+      amount = Math.round(totalPayment * 100);
+    }
 
-  //Math.round(payment_amount * 100);
+    //Math.round(payment_amount * 100);
 
-  // let amount = Math.round(payment_amount * 100);
+    // let amount = Math.round(payment_amount * 100);
 
-  if (userType === "user") {
-    user_query = {
-      "user_information.user": userId,
-    };
-    user_info = {
-      user_information: {
-        user_type: userType,
-        user: userId,
-      },
-    };
-  } else {
-    user_query = {
-      "user_information.client": userId,
-    };
-    user_info = {
-      user_information: {
-        user_type: userType,
-        client: userId,
-      },
-    };
-  }
-  console.log("show me amount " + amount);
-  await Stripe.customers
-    .create({
-      name: full_name,
-      email: email,
-      source: stripeToken,
-    })
-    .then(
-      async (customer) =>
-        await Stripe.charges.create({
-          amount,
-          currency: "usd",
-          customer: customer.id,
-          description: "Booking a room",
-          metadata: {
-            from: "GojoBooking",
-            customer_name: full_name,
-            customer_email: email,
-            customer_phone: phone,
-          },
-          receipt_email: "info@gojobooking.com",
-        })
-    )
-    .then(
-      async (charge) =>
-        charge.status === "succeeded"
-          ? await ProfitMdl.create({
-              user_information: {
-                user_type: userType,
-                user: userId,
-              },
-              amount: commissionPayment,
-              transaction: transaction_doc.id,
-              reason: "Booking a room",
-              status: "available",
-            }).then(async (profit_data) => {
-              if (profit_data) {
-                output.push("ok", profit_data, 201);
-              } else {
-                output.push("bad", "profit not saved", 400);
-              }
-            })
-          : await TransactionDal.create({
-              user_information: user_info.user_information,
-              transaction_status: transaction_status,
-              wallet_recharge: {
-                is_recharge: recharge_boolean,
-                status: charge.status,
-                fee: calculateStripe(totalPayment),
-                amount: totalPayment,
-                stripeId: charge.id,
-              },
-              amount: totalPayment - calculateStripe(totalPayment),
-              action_type: actionType,
-              reason: reason,
-            })
-              .then(async (transaction_doc) => {
-                await BalanceDal.find({
-                  $and: [user_query, {status: "available"}],
-                })
-                  .sort({_id: -1})
-                  .then(async (doc) => {
-                    let current_balance = 0;
-                    if (doc.length > 0) {
-                      current_balance = transaction_doc.amount + doc[0].balance;
-                    } else {
-                      current_balance = transaction_doc.amount;
-                    }
-                    reason === "recharge"
-                      ? await BalanceDal.create({
-                          user_information: user_info.user_information,
-                          balance: current_balance,
-                          transaction: transaction_doc.id,
-                          status: charge.status,
-                        })
-                          .then((balance_document) => {
-                            balance_document
-                              ? output.push("good", charge.status, 201)
-                              : output.push("bad", "ooops", 400);
-                          })
-                          .catch((err) => {
-                            output.push(err, err, 500);
-                          })
-                      : /** transfer the rest as a profit */
-                        await ProfitMdl.create({
-                          user_information: user_info.user_information,
-                          amount:
-                            roomInfo.subRoomType.price_info.commissionAmount,
-                          transaction: transaction_doc.id,
-                          reason: "Booking a room",
-                          status: charge.status,
-                        })
-                          .then(async (profit_data) => {
-                            if (profit_data) {
-                              output.push("ok", "data saved", 201);
-                            } else {
-                              output.push("bad", "profit not saved", 400);
-                            }
-                          })
-                          .catch((err) => {
-                            output.push("bad", err, 500);
-                          });
-                  })
-                  .catch((err) => {
-                    output.push("bad", err, 500);
-                  });
-
-                output.push("good", "pending", 201);
+    if (userType === "user") {
+      user_query = {
+        "user_information.user": userId,
+      };
+      user_info = {
+        user_information: {
+          user_type: userType,
+          user: userId,
+        },
+      };
+    } else {
+      user_query = {
+        "user_information.client": userId,
+      };
+      user_info = {
+        user_information: {
+          user_type: userType,
+          client: userId,
+        },
+      };
+    }
+    console.log("show me amount " + amount);
+    await Stripe.customers
+      .create({
+        name: full_name,
+        email: email,
+        source: stripeToken,
+      })
+      .then(
+        async (customer) =>
+          await Stripe.charges.create({
+            amount,
+            currency: "usd",
+            customer: customer.id,
+            description: "Booking a room",
+            metadata: {
+              from: "GojoBooking",
+              customer_name: full_name,
+              customer_email: email,
+              customer_phone: phone,
+            },
+            receipt_email: "info@gojobooking.com",
+          })
+      )
+      .then(
+        async (charge) =>
+          charge.status === "succeeded"
+            ? await ProfitMdl.create({
+                user_information: {
+                  user_type: userType,
+                  user: userId,
+                },
+                amount: commissionPayment,
+                // transaction: transaction_doc.id,
+                reason: "Booking a room",
+                status: "available",
+              }).then(async (profit_data) => {
+                if (profit_data) {
+                  output.push("ok", profit_data, 201);
+                } else {
+                  output.push("bad", "profit not saved", 400);
+                }
               })
-              .catch((error) => {
-                output.push("bad", error, 500);
-              })
+            : output.push("bad", "payment failed", 400)
 
-      // ((stripe_response = charge))
-    )
+        // ((stripe_response = charge))
+      )
 
-    .catch((err) => {
-      output.push("bad", err, 500);
-      //   res.status(err.raw.statusCode).json({
-      //     error: true,
-      //     type: err.raw.type,
-      //     msg: err.raw.message,
-      //     status: err.raw.statusCode,
-      //   });
-    });
-
-  return output;
+      .catch((err) => {
+        console.log("you");
+        console.log(err);
+        output.push("bad", err, 500);
+        //   res.status(err.raw.statusCode).json({
+        //     error: true,
+        //     type: err.raw.type,
+        //     msg: err.raw.message,
+        //     status: err.raw.statusCode,
+        //   });
+      });
+    return output;
+  } catch (error) {
+    console.log(error);
+    return ["bad", error.message, 500];
+  }
 };
 
 exports = module.exports.walletPay = async function (

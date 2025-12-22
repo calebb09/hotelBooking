@@ -1,9 +1,11 @@
-const hbs = require("nodemailer-express-handlebars");
+const hbsModule = require("nodemailer-express-handlebars");
+const hbs = hbsModule.default;
 const handlebars = require("handlebars");
 const path = require("path");
 const Config = require("../../config");
 const DeviceDal = require("../dal/device");
 const NotifiDal = require("../dal/notification");
+const Notification = require("../models/notification");
 const Client = require("../models/client");
 const fireadmin = require("firebase-admin");
 let mailOpts = {};
@@ -95,11 +97,8 @@ exports = module.exports = async function (
       message.notification.title !== "Reset Request for forgotten password" ||
       message.notification.title !== "Registered Successfully on GojoBooking"
     ) {
-      NotifiDal.create(combination, function saveNotification(err, ndoc) {
-        if (err) {
-          return next(err);
-        }
-      });
+      const createNotifi = await Notification.create(combination);
+
       if (getUUID !== null) {
         DeviceDal.getCollection(
           {

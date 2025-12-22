@@ -1,5 +1,5 @@
 // Load Module Dependencies
-const jwtDecode = require("jwt-decode");
+const {jwtDecode} = require("jwt-decode");
 const Accommodation = require("../models/accommodation");
 const config = require("../../config");
 const StripePayment = require("../functions/stripePayment");
@@ -272,13 +272,16 @@ exports.directPay = async (req, res, next) => {
       // console.log("children error here...");
       errors.push("number of children does not match your description", 400);
     }
-    let getAccommodation = await RoomMdl.findOne({_id: req.body.room[0]});
+    let getAccommodation = await RoomMdl.findOne({
+      _id: req.body.room[0],
+    }).populate({path: "subRoomType", model: SubRoom});
+
     let query = {
       description: req.body.descrption,
       room: req.body.room,
       checkIn: req.body.checkIn,
       checkOut: req.body.checkOut,
-      accommodation: getAccommodation.accommodation,
+      accommodation: getAccommodation.subRoomType.accommodation.toString(),
       guests: {
         adult: req.body.adult,
         children: req.body.children,
@@ -313,13 +316,6 @@ exports.directPay = async (req, res, next) => {
       full_name = body.name;
       phone = body.phone_number;
 
-      req
-        .check("email")
-        .notEmpty()
-        .withMessage("Email is required")
-        .isEmail()
-        .withMessage("Should be valid email");
-      req.check("name").notEmpty().withMessage("Full name is required");
       email = body.email;
       entry = {
         created_by: {
@@ -341,7 +337,7 @@ exports.directPay = async (req, res, next) => {
       phone = clientInfo[0].phone;
       if (clientInfo[0].email === null || clientInfo[0].email === undefined) {
         req
-          .check("email")
+          .checkBody("email")
           .notEmpty()
           .withMessage("Email is required")
           .isEmail()
@@ -386,7 +382,7 @@ exports.directPay = async (req, res, next) => {
         let roomDetail = [];
         for (let i = 0; i < req.body.room.length; i++) {
           let room_doc = await RoomMdl.findOne({
-            $and: [{_id: req.body.room[i]}, {status: "available"}],
+            $and: [{_id: req.body.room[i]}],
           }).populate([
             {path: "subRoomType", model: SubRoom, select: "price_info"},
           ]);
@@ -394,18 +390,8 @@ exports.directPay = async (req, res, next) => {
         }
 
         if (body.currency_type === "USD") {
-          req
-            .checkBody("stripeToken")
-            .notEmpty()
-            .withMessage("StripeToken is required");
-          var validationErrors = req.validationErrors();
-          if (validationErrors) {
-            res.status(400);
-            res.json(validationErrors);
-            return;
-          }
           var amount = 0;
-
+          console.log(roomDetail);
           await StripePayment.directPay(
             "user",
             userId,
@@ -418,7 +404,8 @@ exports.directPay = async (req, res, next) => {
             "added",
             "booking",
             roomDetail,
-            serviceCharge
+            serviceCharge,
+            req.body
           )
             .then((data) => {
               data[2] === 201
@@ -430,74 +417,68 @@ exports.directPay = async (req, res, next) => {
           if (output_response[0] === "ok") {
             // console.log(output_response[2]);
             let addedTransactiondocument = Object.assign(create_query, {
-              transaction: output_response[2].id,
+              // transaction: output_response[2].id,
               is_paid: true,
             });
-            BookingDal.create(
-              addedTransactiondocument,
-              async (err, book_create_doc) => {
-                if (err) {
-                  return next(err);
-                }
-                let user_doc = await UserModel.find({
-                  $or: [
-                    {
-                      assigned_accommodation: roomDetail[0].accommodation,
-                    },
-                    {
-                      role: "super_admin",
-                    },
-                  ],
-                });
-                user_doc.map((item) => {
-                  item.account_status === "active"
-                    ? email_lists.push(item.username)
-                    : email_lists.push();
-                });
-
-                let checkInformattedDate = config.DATE_READABLE(
-                  book_create_doc.checkIn
-                );
-                let checkOutformattedDate = config.DATE_READABLE(
-                  book_create_doc.checkOut
-                );
-                /** you need a notification alert */
-                let howmanyRooms = roomDetail.length;
-                let room_numbers = [];
-                roomDetail.forEach((item) => {
-                  room_numbers.push(item.room_number);
-                });
-                message = {
-                  notification: {
-                    title: "Room Booking Request",
-                    body: `${full_name} has requested for ${howmanyRooms} Room[s], Room number: ${room_numbers} to be booked on ${checkInformattedDate}. Checkout date on ${checkOutformattedDate}`,
-                  },
-                };
-
-                /** update or enter the room */
-                for (let i = 0; i < req.body.room.length; i++) {
-                  await RoomMdl.updateOne(
-                    {_id: req.body.room[i]},
-                    {
-                      $push: {booking_calendar: book_create_doc.id},
-                      updated_at: new Date(),
-                    }
-                  );
-                }
-
-                SendMessage(
-                  message,
-                  null,
-                  roomDetail[0].accommodation,
-                  "bcc",
-                  email_lists
-                );
-                res.status(200).json({
-                  msg: "book request sent",
-                  status: 200,
-                });
-              }
+            console.log(addedTransactiondocument);
+            let book_create_doc = await BookingMdl.create(
+              addedTransactiondocument
             );
+
+            let user_doc = await UserModel.find({
+              $or: [
+                {
+                  assigned_accommodation: roomDetail[0].accommodation,
+                },
+              ],
+            });
+            user_doc.map((item) => {
+              item.account_status === "active"
+                ? email_lists.push(item.username)
+                : email_lists.push();
+            });
+
+            let checkInformattedDate = config.DATE_READABLE(
+              book_create_doc.checkIn
+            );
+            let checkOutformattedDate = config.DATE_READABLE(
+              book_create_doc.checkOut
+            );
+            /** you need a notification alert */
+            let howmanyRooms = roomDetail.length;
+            let room_numbers = [];
+            roomDetail.forEach((item) => {
+              room_numbers.push(item.room_number);
+            });
+            message = {
+              notification: {
+                title: "Room Booking Request",
+                body: `${full_name} has requested for ${howmanyRooms} Room[s], Room number: ${room_numbers} to be booked on ${checkInformattedDate}. Checkout date on ${checkOutformattedDate}`,
+              },
+            };
+
+            /** update or enter the room */
+            for (let i = 0; i < req.body.room.length; i++) {
+              await RoomMdl.updateOne(
+                {_id: req.body.room[i]},
+                {
+                  $push: {booking_calendar: book_create_doc.id},
+                  updated_at: new Date(),
+                }
+              );
+            }
+
+            SendMessage(
+              message,
+              null,
+              roomDetail[0].accommodation,
+              "bcc",
+              email_lists
+            );
+            res.status(200).json({
+              msg: "book request sent",
+              status: 200,
+            });
           } else {
             res.status(output_response[1]).json(output_response);
           }
@@ -528,11 +509,15 @@ exports.localPay = async (req, res, next) => {
       let roomDetail = [];
       for (let i = 0; i < req.body.room.length; i++) {
         let room_doc = await RoomMdl.findOne({
-          $and: [{_id: req.body.room[i]}, {status: "available"}],
-        });
+          _id: req.body.room[i],
+        }).populate({path: "subRoomType", model: SubRoom});
         room_doc === null ? roomDetail.push() : roomDetail.push(room_doc);
       }
-      let getAccommodation = await RoomMdl.findOne({_id: req.body.room[0]});
+
+      let getAccommodation = await RoomMdl.findOne({
+        _id: req.body.room[0],
+      }).populate({path: "subRoomType", model: SubRoom});
+      console.log(getAccommodation);
       let serviceCharge = 0;
       let userId = null;
       let query = {
@@ -540,7 +525,7 @@ exports.localPay = async (req, res, next) => {
         room: req.body.room,
         checkIn: req.body.checkIn,
         checkOut: req.body.checkOut,
-        accommodation: getAccommodation.accommodation,
+        accommodation: getAccommodation.subRoomType.accommodation.toString(),
         guests: {
           adult: req.body.adult,
           children: req.body.children,
@@ -603,7 +588,8 @@ exports.localPay = async (req, res, next) => {
         txtId,
         req.body.email,
         req.body.first_name,
-        req.body.last_name
+        req.body.last_name,
+        req.body
       );
 
       if (startRequest.statusCode === 200 || startRequest.statusCode === 201) {
@@ -620,6 +606,7 @@ exports.localPay = async (req, res, next) => {
           return res.status(400).json({msg: "Booking request failed"});
         }
       } else {
+        console.log(startRequest);
         return res.status(startRequest.status).json(startRequest);
       }
     } else {

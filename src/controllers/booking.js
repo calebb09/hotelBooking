@@ -592,398 +592,415 @@ exports.requestBookingWallet = async (req, res, next) => {
   }
 };
 exports.searchRooms = async (req, res, next) => {
-  // Check for overlapping bookings for a specific room
-  async function checkRoomBookingOverlap(
-    accommodation,
-    roomId,
-    checkIn,
-    checkOut
-  ) {
-    const existingBookings = await BookMdl.find({
-      // accommodation: accommodation,
-      room: roomId,
-      checkIn: {$lt: checkOut},
-      checkOut: {$gt: checkIn},
-      status: {$in: ["pending", "reserved"]},
-    });
-    return existingBookings.length > 0;
-  }
-
-  // Function to generate combinations of rooms
-  function getRoomCombinations(rooms, totalGuests, maxRooms = 4) {
-    const combinations = [];
-
-    // Helper function to generate combinations recursively
-    function combine(currentCombo, start, remainingGuests) {
-      if (remainingGuests <= 0 && currentCombo.length >= 2) {
-        // Require at least 2 rooms
-        combinations.push([...currentCombo]);
-        return;
-      }
-      for (let i = start; i < rooms.length; i++) {
-        const room = rooms[i];
-        if (
-          room.subRoomType.number_of_guests <= remainingGuests &&
-          currentCombo.length < maxRooms
-        ) {
-          currentCombo.push(room);
-          combine(
-            currentCombo,
-            i + 1,
-            remainingGuests - room.subRoomType.number_of_guests
-          );
-          currentCombo.pop();
-        }
-      }
+  try {
+    // Check for overlapping bookings for a specific room
+    async function checkRoomBookingOverlap(
+      accommodation,
+      roomId,
+      checkIn,
+      checkOut
+    ) {
+      const existingBookings = await BookMdl.find({
+        // accommodation: accommodation,
+        room: roomId,
+        checkIn: {$lt: checkOut},
+        checkOut: {$gt: checkIn},
+        status: {$in: ["pending", "reserved"]},
+      });
+      return existingBookings.length > 0;
     }
 
-    combine([], 0, totalGuests);
-    return combinations;
-  }
+    // Function to generate combinations of rooms
+    function getRoomCombinations(rooms, totalGuests, maxRooms = 4) {
+      const combinations = [];
 
-  // Function to find available rooms and combinations
-  async function findAvailableRooms(
-    accommodation,
-    checkIn,
-    checkOut,
-    totalGuests,
-    strictMatch = false
-  ) {
-    // ✅ Get all available rooms, populate subRoomType + related models
-    const allRooms = await RoomMdl.find({
-      // status: "available",
-      is_hidden: false,
-    }).populate({
-      path: "subRoomType",
-      model: subRoomType,
-      populate: [
-        {path: "facilities", model: Facility},
-        {path: "roomType", model: RoomType},
-        {path: "accommodation", model: Accommodation},
-        {
-          path: "rates",
-          model: Rate,
-          populate: [{path: "client", model: Client}],
-        },
-      ],
-    });
+      // Helper function to generate combinations recursively
+      function combine(currentCombo, start, remainingGuests) {
+        if (remainingGuests <= 0 && currentCombo.length >= 2) {
+          // Require at least 2 rooms
+          combinations.push([...currentCombo]);
+          return;
+        }
+        for (let i = start; i < rooms.length; i++) {
+          const room = rooms[i];
+          if (
+            room.subRoomType.number_of_guests <= remainingGuests &&
+            currentCombo.length < maxRooms
+          ) {
+            currentCombo.push(room);
+            combine(
+              currentCombo,
+              i + 1,
+              remainingGuests - room.subRoomType.number_of_guests
+            );
+            currentCombo.pop();
+          }
+        }
+      }
 
-    // ✅ Filter by accommodation (after populate)
-    const filteredRooms = allRooms.filter((room) => {
-      if (!room.subRoomType?.accommodation?._id) return false;
-      return (
-        room.subRoomType.accommodation._id.toString() ===
-        accommodation.toString()
-      );
-    });
+      combine([], 0, totalGuests);
+      return combinations;
+    }
 
-    console.log(
-      `Rooms for accommodation ${accommodation}: ${filteredRooms.length}`
-    );
+    // Function to find available rooms and combinations
+    async function findAvailableRooms(
+      accommodation,
+      checkIn,
+      checkOut,
+      totalGuests,
+      strictMatch = false
+    ) {
+      // ✅ Get all available rooms, populate subRoomType + related models
+      const allRooms = await RoomMdl.find({
+        // status: "available",
+        is_hidden: false,
+      }).populate({
+        path: "subRoomType",
+        model: subRoomType,
+        populate: [
+          {path: "facilities", model: Facility},
+          {path: "roomType", model: RoomType},
+          {path: "accommodation", model: Accommodation},
+          {
+            path: "rates",
+            model: Rate,
+            populate: [{path: "client", model: Client}],
+          },
+        ],
+      });
 
-    // ✅ Filter out rooms with overlapping bookings
-    const availableRooms = await Promise.all(
-      filteredRooms.map(async (room) => {
-        const isOverlapping = await checkRoomBookingOverlap(
-          accommodation,
-          room._id,
-          checkIn,
-          checkOut
+      // ✅ Filter by accommodation (after populate)
+      const filteredRooms = allRooms.filter((room) => {
+        if (!room.subRoomType?.accommodation?._id) return false;
+        return (
+          room.subRoomType.accommodation._id.toString() ===
+          accommodation.toString()
         );
-        return !isOverlapping ? room : null;
-      })
-    ).then((rooms) => rooms.filter(Boolean));
+      });
 
-    console.log(
-      `Available rooms after overlap check: ${availableRooms.length}`,
-      availableRooms.map((room) => ({
-        _id: room._id,
-        guests: room.subRoomType?.number_of_guests,
-      }))
+      console.log(
+        `Rooms for accommodation ${accommodation}: ${filteredRooms.length}`
+      );
+
+      // ✅ Filter out rooms with overlapping bookings
+      const availableRooms = await Promise.all(
+        filteredRooms.map(async (room) => {
+          const isOverlapping = await checkRoomBookingOverlap(
+            accommodation,
+            room._id,
+            checkIn,
+            checkOut
+          );
+          return !isOverlapping ? room : null;
+        })
+      ).then((rooms) => rooms.filter(Boolean));
+
+      console.log(
+        `Available rooms after overlap check: ${availableRooms.length}`,
+        availableRooms.map((room) => ({
+          _id: room._id,
+          guests: room.subRoomType?.number_of_guests,
+        }))
+      );
+
+      // ✅ Single rooms that fit guests
+      const individualRooms = availableRooms.filter((room) =>
+        strictMatch
+          ? room.subRoomType.number_of_guests === totalGuests
+          : room.subRoomType.number_of_guests >= totalGuests
+      );
+
+      // ✅ Combinations of rooms
+      const roomCombinations = getRoomCombinations(availableRooms, totalGuests);
+
+      const formattedCombinations = roomCombinations.map((combo) => ({
+        type: "combination",
+        rooms: combo,
+        totalCapacity: combo.reduce(
+          (sum, room) => sum + room.subRoomType.number_of_guests,
+          0
+        ),
+        totalPrice: combo.reduce(
+          (sum, room) =>
+            sum + (room.subRoomType.price_info?.original_price || 0),
+          0
+        ),
+      }));
+
+      // ✅ Final result
+      return [
+        ...individualRooms.map((room) => ({
+          type: "single",
+          ...room.toObject(),
+          totalCapacity: room.subRoomType.number_of_guests,
+          totalPrice: room.subRoomType.price_info?.room_price || 0,
+        })),
+        ...formattedCombinations,
+      ];
+    }
+
+    // Extract request body parameters
+    const {accommodation, checkIn, checkOut, guests} = req.body;
+    const totalGuests = guests.adult + guests.children;
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+
+    // Extract query parameters for pagination
+    let page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || 20;
+
+    // Validate input
+    if (!accommodation || !checkIn || !checkOut || !guests) {
+      return res.status(400).json({msg: "Missing required parameters"});
+    }
+
+    // Validate pagination parameters
+    if (page < 1 || limit < 1) {
+      return res.status(400).json({msg: "Invalid page or limit parameters"});
+    }
+
+    // Find available rooms
+    const availableRoomsOrCombinations = await findAvailableRooms(
+      accommodation,
+      checkInDate,
+      checkOutDate,
+      totalGuests,
+      false
     );
 
-    // ✅ Single rooms that fit guests
-    const individualRooms = availableRooms.filter((room) =>
-      strictMatch
-        ? room.subRoomType.number_of_guests === totalGuests
-        : room.subRoomType.number_of_guests >= totalGuests
-    );
+    // Pagination logic
+    const total = availableRoomsOrCombinations.length;
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    const paginatedData = availableRoomsOrCombinations.slice(start, end);
 
-    // ✅ Combinations of rooms
-    const roomCombinations = getRoomCombinations(availableRooms, totalGuests);
-
-    const formattedCombinations = roomCombinations.map((combo) => ({
-      type: "combination",
-      rooms: combo,
-      totalCapacity: combo.reduce(
-        (sum, room) => sum + room.subRoomType.number_of_guests,
-        0
-      ),
-      totalPrice: combo.reduce(
-        (sum, room) => sum + (room.subRoomType.price_info?.original_price || 0),
-        0
-      ),
-    }));
-
-    // ✅ Final result
-    return [
-      ...individualRooms.map((room) => ({
-        type: "single",
-        ...room.toObject(),
-        totalCapacity: room.subRoomType.number_of_guests,
-        totalPrice: room.subRoomType.price_info?.room_price || 0,
-      })),
-      ...formattedCombinations,
-    ];
+    // Return response
+    res.json({
+      data: paginatedData,
+      limit: limit,
+      page: page,
+      total: total,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({msg: error.message, error});
   }
-
-  // Extract request body parameters
-  const {accommodation, checkIn, checkOut, guests} = req.body;
-  const totalGuests = guests.adult + guests.children;
-  const checkInDate = new Date(checkIn);
-  const checkOutDate = new Date(checkOut);
-
-  // Extract query parameters for pagination
-  let page = parseInt(req.query.page) || 1;
-  let limit = parseInt(req.query.limit) || 20;
-
-  // Validate input
-  if (!accommodation || !checkIn || !checkOut || !guests) {
-    return res.status(400).json({msg: "Missing required parameters"});
-  }
-
-  // Validate pagination parameters
-  if (page < 1 || limit < 1) {
-    return res.status(400).json({msg: "Invalid page or limit parameters"});
-  }
-
-  // Find available rooms
-  const availableRoomsOrCombinations = await findAvailableRooms(
-    accommodation,
-    checkInDate,
-    checkOutDate,
-    totalGuests,
-    false
-  );
-
-  // Pagination logic
-  const total = availableRoomsOrCombinations.length;
-  const start = (page - 1) * limit;
-  const end = start + limit;
-  const paginatedData = availableRoomsOrCombinations.slice(start, end);
-
-  // Return response
-  res.json({
-    data: paginatedData,
-    limit: limit,
-    page: page,
-    total: total,
-  });
 };
 exports.searchforOneGuest = async (req, res) => {
-  // =========================
-  // CHECK BOOKING OVERLAP
-  // =========================
-  async function checkRoomBookingOverlap(
-    accommodation,
-    roomId,
-    checkIn,
-    checkOut
-  ) {
-    const existingBookings = await BookMdl.find({
-      room: roomId,
-      checkIn: {$lt: checkOut},
-      checkOut: {$gt: checkIn},
-      status: {$in: ["pending", "reserved"]},
-    });
+  try {
+    // =========================
+    // CHECK BOOKING OVERLAP
+    // =========================
+    if (req.body.guests.adult + req.body.guests.children > 1) {
+      return res
+        .status(400)
+        .json({msg: "This endpoint is for single guest only"});
+    }
+    async function checkRoomBookingOverlap(
+      accommodation,
+      roomId,
+      checkIn,
+      checkOut
+    ) {
+      const existingBookings = await BookMdl.find({
+        room: roomId,
+        checkIn: {$lt: checkOut},
+        checkOut: {$gt: checkIn},
+        status: {$in: ["pending", "reserved"]},
+      });
 
-    return existingBookings.length > 0;
-  }
+      return existingBookings.length > 0;
+    }
 
-  // =========================
-  // GENERATE ROOM COMBINATIONS
-  // =========================
-  function getRoomCombinations(rooms, totalGuests, maxRooms = 4) {
-    const combinations = [];
+    // =========================
+    // GENERATE ROOM COMBINATIONS
+    // =========================
+    function getRoomCombinations(rooms, totalGuests, maxRooms = 4) {
+      const combinations = [];
 
-    function combine(currentCombo, start, remainingGuests) {
-      if (remainingGuests <= 0 && currentCombo.length >= 2) {
-        combinations.push([...currentCombo]);
-        return;
-      }
+      function combine(currentCombo, start, remainingGuests) {
+        if (remainingGuests <= 0 && currentCombo.length >= 2) {
+          combinations.push([...currentCombo]);
+          return;
+        }
 
-      for (let i = start; i < rooms.length; i++) {
-        const room = rooms[i];
-        if (
-          room.subRoomType.number_of_guests <= remainingGuests &&
-          currentCombo.length < maxRooms
-        ) {
-          currentCombo.push(room);
-          combine(
-            currentCombo,
-            i + 1,
-            remainingGuests - room.subRoomType.number_of_guests
-          );
-          currentCombo.pop();
+        for (let i = start; i < rooms.length; i++) {
+          const room = rooms[i];
+          if (
+            room.subRoomType.number_of_guests <= remainingGuests &&
+            currentCombo.length < maxRooms
+          ) {
+            currentCombo.push(room);
+            combine(
+              currentCombo,
+              i + 1,
+              remainingGuests - room.subRoomType.number_of_guests
+            );
+            currentCombo.pop();
+          }
         }
       }
+
+      combine([], 0, totalGuests);
+      return combinations;
     }
 
-    combine([], 0, totalGuests);
-    return combinations;
-  }
+    // =========================
+    // FIND AVAILABLE ROOMS
+    // =========================
+    async function findAvailableRooms(
+      accommodation,
+      checkIn,
+      checkOut,
+      totalGuests,
+      strictMatch = false
+    ) {
+      // 1. Find all rooms
+      const allRooms = await RoomMdl.find({
+        // status: "available",
+        is_hidden: false,
+      }).populate({
+        path: "subRoomType",
+        model: subRoomType,
+        populate: [
+          {path: "facilities", model: Facility},
+          {path: "roomType", model: RoomType},
+          {path: "accommodation", model: Accommodation},
+          {
+            path: "rates",
+            model: Rate,
+            populate: [{path: "client", model: Client}],
+          },
+        ],
+      });
 
-  // =========================
-  // FIND AVAILABLE ROOMS
-  // =========================
-  async function findAvailableRooms(
-    accommodation,
-    checkIn,
-    checkOut,
-    totalGuests,
-    strictMatch = false
-  ) {
-    // 1. Find all rooms
-    const allRooms = await RoomMdl.find({
-      // status: "available",
-      is_hidden: false,
-    }).populate({
-      path: "subRoomType",
-      model: subRoomType,
-      populate: [
-        {path: "facilities", model: Facility},
-        {path: "roomType", model: RoomType},
-        {path: "accommodation", model: Accommodation},
-        {
-          path: "rates",
-          model: Rate,
-          populate: [{path: "client", model: Client}],
-        },
-      ],
-    });
-
-    // 2. Filter by accommodation
-    const filteredRooms = allRooms.filter((room) => {
-      if (!room.subRoomType?.accommodation?._id) return false;
-      return (
-        room.subRoomType.accommodation._id.toString() ===
-        accommodation.toString()
-      );
-    });
-
-    // 3. Filter out overlapping bookings
-    const availableRooms = await Promise.all(
-      filteredRooms.map(async (room) => {
-        const isOverlapping = await checkRoomBookingOverlap(
-          accommodation,
-          room._id,
-          checkIn,
-          checkOut
+      // 2. Filter by accommodation
+      const filteredRooms = allRooms.filter((room) => {
+        if (!room.subRoomType?.accommodation?._id) return false;
+        return (
+          room.subRoomType.accommodation._id.toString() ===
+          accommodation.toString()
         );
+      });
 
-        return !isOverlapping ? room : null;
-      })
-    ).then((rooms) => rooms.filter(Boolean));
+      // 3. Filter out overlapping bookings
+      const availableRooms = await Promise.all(
+        filteredRooms.map(async (room) => {
+          const isOverlapping = await checkRoomBookingOverlap(
+            accommodation,
+            room._id,
+            checkIn,
+            checkOut
+          );
 
-    // 4. (Optional) Individual room strict match filter
-    const individualRooms = availableRooms.filter((room) =>
-      strictMatch
-        ? room.subRoomType.number_of_guests === totalGuests
-        : room.subRoomType.number_of_guests >= totalGuests
-    );
+          return !isOverlapping ? room : null;
+        })
+      ).then((rooms) => rooms.filter(Boolean));
 
-    // 5. Room combinations
-    const roomCombinations = getRoomCombinations(availableRooms, totalGuests);
+      // 4. (Optional) Individual room strict match filter
+      const individualRooms = availableRooms.filter((room) =>
+        strictMatch
+          ? room.subRoomType.number_of_guests === totalGuests
+          : room.subRoomType.number_of_guests >= totalGuests
+      );
 
-    // (Not used in final result but kept for logic reference)
-    const formattedCombinations = roomCombinations.map((combo) => ({
-      type: "combination",
-      rooms: combo,
-      totalCapacity: combo.reduce(
-        (sum, room) => sum + room.subRoomType.number_of_guests,
-        0
-      ),
-      totalPrice: combo.reduce(
-        (sum, room) => sum + (room.subRoomType.price_info?.original_price || 0),
-        0
-      ),
-    }));
+      // 5. Room combinations
+      const roomCombinations = getRoomCombinations(availableRooms, totalGuests);
 
-    // ================================
-    // ⭐ GROUP AVAILABLE ROOMS BY SUBROOMTYPE
-    // ================================
-    const groupedBySubRoomType = {};
+      // (Not used in final result but kept for logic reference)
+      const formattedCombinations = roomCombinations.map((combo) => ({
+        type: "combination",
+        rooms: combo,
+        totalCapacity: combo.reduce(
+          (sum, room) => sum + room.subRoomType.number_of_guests,
+          0
+        ),
+        totalPrice: combo.reduce(
+          (sum, room) =>
+            sum + (room.subRoomType.price_info?.original_price || 0),
+          0
+        ),
+      }));
 
-    for (const room of availableRooms) {
-      const srtId = room.subRoomType._id.toString();
+      // ================================
+      // ⭐ GROUP AVAILABLE ROOMS BY SUBROOMTYPE
+      // ================================
+      const groupedBySubRoomType = {};
 
-      if (!groupedBySubRoomType[srtId]) {
-        groupedBySubRoomType[srtId] = {
-          subRoomType: room.subRoomType,
-          rooms: [],
-        };
+      for (const room of availableRooms) {
+        const srtId = room.subRoomType._id.toString();
+
+        if (!groupedBySubRoomType[srtId]) {
+          groupedBySubRoomType[srtId] = {
+            subRoomType: room.subRoomType,
+            rooms: [],
+          };
+        }
+
+        groupedBySubRoomType[srtId].rooms.push(room);
       }
 
-      groupedBySubRoomType[srtId].rooms.push(room);
+      // Convert to array + add availableRooms count
+      const formattedSubRoomTypes = Object.values(groupedBySubRoomType).map(
+        (item) => ({
+          subRoomType: item.subRoomType,
+          availableRooms: item.rooms.length,
+          rooms: item.rooms, // remove this if you don't want full room info
+        })
+      );
+
+      // FINAL RETURN
+      return formattedSubRoomTypes;
     }
 
-    // Convert to array + add availableRooms count
-    const formattedSubRoomTypes = Object.values(groupedBySubRoomType).map(
-      (item) => ({
-        subRoomType: item.subRoomType,
-        availableRooms: item.rooms.length,
-        rooms: item.rooms, // remove this if you don't want full room info
-      })
+    // =========================
+    // CONTROLLER ENDPOINT
+    // =========================
+    const {accommodation, checkIn, checkOut, guests} = req.body;
+
+    const totalGuests = guests.adult + guests.children;
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+
+    // Pagination
+    let page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || 20;
+
+    // Validation
+    if (!accommodation || !checkIn || !checkOut || !guests) {
+      return res.status(400).json({msg: "Missing required parameters"});
+    }
+
+    if (page < 1 || limit < 1) {
+      return res.status(400).json({msg: "Invalid page or limit parameters"});
+    }
+
+    // Get final formatted grouped result
+    const results = await findAvailableRooms(
+      accommodation,
+      checkInDate,
+      checkOutDate,
+      totalGuests,
+      false
     );
 
-    // FINAL RETURN
-    return formattedSubRoomTypes;
+    // Pagination
+    const total = results.length;
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    const paginatedData = results.slice(start, end);
+
+    // Response
+    res.json({
+      data: paginatedData,
+      limit,
+      page,
+      total,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({msg: "Internal Server Error", error});
   }
-
-  // =========================
-  // CONTROLLER ENDPOINT
-  // =========================
-  const {accommodation, checkIn, checkOut, guests} = req.body;
-
-  const totalGuests = guests.adult + guests.children;
-  const checkInDate = new Date(checkIn);
-  const checkOutDate = new Date(checkOut);
-
-  // Pagination
-  let page = parseInt(req.query.page) || 1;
-  let limit = parseInt(req.query.limit) || 20;
-
-  // Validation
-  if (!accommodation || !checkIn || !checkOut || !guests) {
-    return res.status(400).json({msg: "Missing required parameters"});
-  }
-
-  if (page < 1 || limit < 1) {
-    return res.status(400).json({msg: "Invalid page or limit parameters"});
-  }
-
-  // Get final formatted grouped result
-  const results = await findAvailableRooms(
-    accommodation,
-    checkInDate,
-    checkOutDate,
-    totalGuests,
-    false
-  );
-
-  // Pagination
-  const total = results.length;
-  const start = (page - 1) * limit;
-  const end = start + limit;
-  const paginatedData = results.slice(start, end);
-
-  // Response
-  res.json({
-    data: paginatedData,
-    limit,
-    page,
-    total,
-  });
 };
 exports.searchBooking = async (req, res, next) => {
   try {

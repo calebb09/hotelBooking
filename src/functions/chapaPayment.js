@@ -37,7 +37,7 @@ const chapaDirectPay = async (
     );
 
     // get total price
-    let totalPayment = await ifonlydiscountLocaldirectPay(rooms, booking);
+    // let totalPayment = await ifonlydiscountLocaldirectPay(rooms, booking);
     // if (discount === "20%") {
     //   totalPayment = await ifonlydiscountLocaldirectPay(rooms);
     // } else {
@@ -49,12 +49,14 @@ const chapaDirectPay = async (
     // }
 
     //new updated totalPayment
-    let updatedPayment = totalPayment * diffDays;
-    let getTotalPaymentBirr = updatedPayment * rate;
-    let finalPayment = getTotalPaymentBirr + getTotalPaymentBirr * 0.025;
+    // let updatedPayment = totalPayment * diffDays;
+    // let getTotalPaymentBirr = updatedPayment * rate;
+    // let finalPayment = getTotalPaymentBirr + getTotalPaymentBirr * 0.025;
 
     //newGojoShare
+
     let gojoShare = totalCommission(rooms, discount) * diffDays;
+    console.log("gojoShare", gojoShare);
     let gojoShareBirr = gojoShare * rate;
 
     //getHotelShare
@@ -84,10 +86,10 @@ const chapaDirectPay = async (
         // chapa_ref: saveCharge.data.meta.ref_id,
         status: saveCharge.data.payment_status,
         chargeInfo: {
-          actual_price: getTotalPaymentBirr,
-          fee: getTotalPaymentBirr * config.Chapa.fee,
-          total: getTotalPaymentBirr - getTotalPaymentBirr * config.Chapa.fee,
-          hotelShare: hotelShareBirr,
+          // actual_price: getTotalPaymentBirr,
+          // fee: getTotalPaymentBirr * config.Chapa.fee,
+          // total: getTotalPaymentBirr - getTotalPaymentBirr * config.Chapa.fee,
+          // hotelShare: hotelShareBirr,
           gojoShare: gojoShareBirr,
         },
       });

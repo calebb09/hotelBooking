@@ -42,6 +42,7 @@ const createPayment = async (
   logo
 ) => {
   try {
+    console.log("amount", amount);
     const response = await axios.post(
       `${config.CHAPA_URL}/transaction/initialize`,
       {
