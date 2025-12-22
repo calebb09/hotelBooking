@@ -47,16 +47,17 @@ exports = module.exports.directPay = async function (
     hotelShare = totalRoomPrice(roomInfo, bookingDetail) * diffDays;
     commissionPayment = totalCommission(roomInfo, discount) * diffDays;
     console.log("discount " + discount);
-    if (discount === "20%") {
-      totalPayment =
-        ifonlydiscountdirectPay(roomInfo, bookingDetail) * diffDays;
-    } else {
-      totalPayment =
-        calculateTotalPriceifdiscountLevelhaveValuedirectPay(
-          roomInfo,
-          discount
-        ) * diffDays;
-    }
+    totalPayment = commissionPayment;
+    // if (discount === "20%") {
+    //   totalPayment =
+    //     ifonlydiscountdirectPay(roomInfo, bookingDetail) * diffDays;
+    // } else {
+    //   totalPayment =
+    //     calculateTotalPriceifdiscountLevelhaveValuedirectPay(
+    //       roomInfo,
+    //       discount
+    //     ) * diffDays;
+    // }
     amount = Math.round(totalPayment * 100);
   }
 
@@ -111,114 +112,22 @@ exports = module.exports.directPay = async function (
     .then(
       async (charge) =>
         charge.status === "succeeded"
-          ? await TransactionDal.create({
-              user_information: user_info.user_information,
-              transaction_status: transaction_status,
-              wallet_recharge: {
-                is_recharge: recharge_boolean,
-                status: "succeeded",
-                fee: calculateStripe(totalPayment),
-                amount: totalPayment,
-                stripeId: charge.id,
+          ? await ProfitMdl.create({
+              user_information: {
+                user_type: userType,
+                user: userId,
               },
-              receiptUrl: charge.receipt_url,
-              amount: totalPayment - calculateStripe(totalPayment),
-              action_type: actionType,
-              reason: reason,
+              amount: commissionPayment,
+              transaction: transaction_doc.id,
+              reason: "Booking a room",
+              status: "available",
+            }).then(async (profit_data) => {
+              if (profit_data) {
+                output.push("ok", profit_data, 201);
+              } else {
+                output.push("bad", "profit not saved", 400);
+              }
             })
-              .then(async (transaction_doc) => {
-                await BalanceDal.find({
-                  $and: [user_query, {status: "available"}],
-                })
-                  .sort({_id: -1})
-                  .then(async (doc) => {
-                    let current_balance = 0;
-                    if (doc.length > 0) {
-                      current_balance = transaction_doc.amount + doc[0].balance;
-                    } else {
-                      current_balance = transaction_doc.amount;
-                    }
-
-                    await ProfitMdl.create({
-                      user_information: {
-                        user_type: userType,
-                        user: userId,
-                      },
-                      amount: commissionPayment,
-                      transaction: transaction_doc.id,
-                      reason: "Booking a room",
-                      status: "available",
-                    })
-                      .then(async (profit_data) => {
-                        if (profit_data) {
-                          /** transfer the money to hotel wallet */
-                          await TransactionDal.create({
-                            user_information: {
-                              user_type: "client",
-                              client: roomInfo[0].subRoomType.accommodation,
-                            },
-                            transaction_status: "transfer",
-                            amount: hotelShare,
-                            reason: "room booked from customer " + full_name,
-                            currency_type: "USD",
-                            action_type: "added",
-                          })
-                            .then(async (transactions_doc) => {
-                              let currentBalance = 0;
-                              let prev_balance = await BalanceDal.find({
-                                "user_information.client":
-                                  roomInfo[0].subRoomType.accommodation,
-                              }).sort({_id: -1});
-                              if (prev_balance.length === 0) {
-                                currentBalance = hotelShare;
-                              } else {
-                                currentBalance =
-                                  hotelShare + prev_balance[0].balance;
-                              }
-                              await BalanceDal.create({
-                                user_information: {
-                                  user_type: "client",
-                                  client: roomInfo[0].subRoomType.accommodation,
-                                },
-                                balance: currentBalance,
-                                transaction: transactions_doc.id,
-                              })
-                                .then((balance_doc) => {
-                                  if (balance_doc) {
-                                    output.push(
-                                      "ok",
-                                      balance_doc,
-                                      201,
-                                      transaction_doc
-                                    );
-                                  } else {
-                                    output.push(
-                                      "bad",
-                                      "balance not saved",
-                                      400
-                                    );
-                                  }
-                                })
-                                .catch((err) => {
-                                  output.push("bad", err, 500);
-                                });
-                            })
-                            .catch((err) => {
-                              output.push("bad", err, 500);
-                            });
-                          output.push("ok", profit_data, 201);
-                        } else {
-                          output.push("bad", "profit not saved", 400);
-                        }
-                      })
-                      .catch((err) => {
-                        output.push("bad", err, 500);
-                      });
-                  });
-              })
-              .catch((err) => {
-                output.push("bad", err, 500);
-              })
           : await TransactionDal.create({
               user_information: user_info.user_information,
               transaction_status: transaction_status,
