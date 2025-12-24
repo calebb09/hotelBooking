@@ -786,7 +786,7 @@ exports.searchRooms = async (req, res, next) => {
     return res.status(500).json({msg: error.message, error});
   }
 };
-exports.searchforOneGuest = async (req, res) => {
+exports.searchNewRooms = async (req, res) => {
   try {
     // ===================================================
     // 1. CHECK ROOM BOOKING OVERLAP
