@@ -453,8 +453,8 @@ router.post(
  *               items:
  *                 $ref: '#/components/schemas/BookingError'
  */
-router.post("/filter", BookingController.searchRooms);
-router.post("/search/for-one-guest", BookingController.searchforOneGuest);
+router.post("/old-filter", BookingController.searchRooms);
+router.post("/filter", BookingController.searchforOneGuest);
 /**
  * @swagger
  * /booking/{did}/rate:
