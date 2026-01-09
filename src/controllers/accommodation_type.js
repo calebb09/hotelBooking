@@ -9,7 +9,6 @@ exports.validateAccommodationType = function validateAccommodationType(
   next,
   id
 ) {
-  req.checkParams("id", "Invalid param").isMongoId(id);
   var validationErrors = req.validationErrors();
   if (validationErrors) {
     res.status(404).json({

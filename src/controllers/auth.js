@@ -5,7 +5,7 @@ const UserModel = require("../models/user");
 const ClientDal = require("../dal/client");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const jwtDecode = require("jwt-decode");
+const {jwtDecode} = require("jwt-decode");
 const firebase = require("firebase-admin");
 const CustomError = require("../lib/custom-error");
 /**

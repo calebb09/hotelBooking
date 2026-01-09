@@ -1,45 +1,42 @@
 "use strict";
-// Access Layer for Internal Data.
+/**
+ * Access Layer for Internal Data.
+ */
 /**
  * Load Module Dependencies.
  */
 const debug = require("debug")("api:dal-internal");
-
 const _ = require("lodash");
 const Internal = require("../models/internal");
 const User = require("../models/user");
 // var returnFields = internal.whitelist;
-var population = [
+const population = [
   {
     path: "user",
     model: User,
     select: "-password",
   },
 ];
+
 /**
  * create a new Internal.
  *
  * @desc  creates a new Internal and saves them
  *        in the database
- *6
+ *
  * @param {Object}  internalData  Data for the Internal to create
  * @param {Function} cb       Callback for once saving is complete
  */
 exports.create = function create(internalData, cb) {
   debug("creating a new Internal");
   // Create Internal if is new.
-  var internalModel = new Internal(internalData);
-  internalModel.save(function saveinternal(err, data) {
-    if (err) {
-      return cb(err);
-    }
-    exports.get({_id: data._id}, function (err, doc) {
-      if (err) {
-        return cb(err);
-      }
-      cb(null, doc);
-    });
-  });
+  const internalModel = new Internal(internalData);
+  internalModel
+    .save()
+    .then((data) => {
+      exports.get({_id: data._id}, cb); // Reuse the updated `get` method
+    })
+    .catch((err) => cb(err));
 };
 
 /**
@@ -56,23 +53,17 @@ exports.delete = function deleteItem(query, cb) {
 
   Internal.findOne(query)
     .populate(population)
-    .exec(function deleteinternal(err, doc) {
-      if (err) {
-        return cb(err);
-      }
-
+    .exec() // 👈 Now Promise-based
+    .then((doc) => {
       if (!doc) {
         return cb(null, {});
       }
-
-      Internal.deleteOne(query, function (err) {
-        if (err) {
-          return cb(err);
-        }
-
-        cb(null, doc);
-      });
-    });
+      return Internal.deleteOne(query)
+        .exec()
+        .then(() => doc);
+    })
+    .then((doc) => cb(null, doc))
+    .catch((err) => cb(err));
 };
 
 /**
@@ -88,21 +79,17 @@ exports.delete = function deleteItem(query, cb) {
 exports.update = function update(query, updates, cb) {
   debug("updating Internal: ", query);
 
-  var opts = {
+  const opts = {
     new: true,
   };
 
-  // updates = mongoUpdate(updates);
+  // updates = mongoUpdate(updates);  // Uncomment if needed
 
   Internal.findOneAndUpdate(query, updates, opts)
-    .populate(population)
-    .exec(function updateinternal(err, doc) {
-      if (err) {
-        return cb(err);
-      }
-
-      cb(null, doc || {});
-    });
+    .populate(population) // Chain populate after findOneAndUpdate
+    .exec() // 👈 Promise-based
+    .then((doc) => cb(null, doc || {}))
+    .catch((err) => cb(err));
 };
 
 /**
@@ -118,13 +105,9 @@ exports.get = function get(query, cb) {
 
   Internal.findOne(query)
     .populate(population)
-    .exec(function (err, doc) {
-      if (err) {
-        return cb(err);
-      }
-
-      cb(null, doc || {});
-    });
+    .exec() // 👈 Promise-based (fixes the error here!)
+    .then((doc) => cb(null, doc || {}))
+    .catch((err) => cb(err));
 };
 
 /**
@@ -138,15 +121,11 @@ exports.get = function get(query, cb) {
 exports.getCollection = function getCollection(query, opt, cb) {
   debug("fetching a collection of Internal");
 
-  Internal.find(query, opt)
+  Internal.find(query, {}, opt) // Added empty object for fields if opt is options
     .populate(population)
-    .exec(function getinternalsCollection(err, doc) {
-      if (err) {
-        return cb(err);
-      }
-
-      return cb(null, doc);
-    });
+    .exec() // 👈 Promise-based
+    .then((doc) => cb(null, doc))
+    .catch((err) => cb(err));
 };
 
 /**
@@ -157,26 +136,31 @@ exports.getCollection = function getCollection(query, opt, cb) {
  * @param {Object} query Query Object
  * @param {Function} cb Callback for once fetch is complete
  */
-exports.getCollectionByPagination = function getCollection(query, qs, cb) {
+exports.getCollectionByPagination = function getCollectionByPagination(
+  query,
+  qs,
+  cb
+) {
   debug("fetching a collection of Internal");
 
-  var opts = {
-    // columns:  returnFields,
+  const opts = {
+    // columns: returnFields,  // Uncomment if needed
     sort: qs.sort || {},
     populate: population,
     page: qs.page,
     limit: qs.limit,
   };
-  Internal.paginate(query, opts, function (err, docs, page, count) {
-    if (err) {
-      return cb(err);
-    }
-    var data = {
-      total_pages: page,
-      total_docs_count: count,
-      docs: docs,
-    };
 
-    cb(null, data);
-  });
+  // 👈 Fixed: No callback; use .then() on the Promise
+  Internal.paginate(query, opts)
+    .then((result) => {
+      // Structure matches your old callback (docs, page, count)
+      const data = {
+        docs: result.docs,
+        total_pages: result.totalPages,
+        total_docs_count: result.totalDocs,
+      };
+      cb(null, data);
+    })
+    .catch((err) => cb(err));
 };

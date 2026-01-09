@@ -4,35 +4,34 @@ const firebase = require("firebase-admin"),
   Client = require("../models/client"),
   Location = require("../models/location"),
   sendMessage = require("../functions/sendMessage");
+const mongoose = require("mongoose");
+
 exports.validateClient = function Client(req, res, next, id) {
   //Validate the id in mongoid or not
-  req.checkParams("id", "Invalid param").isMongoId(id);
-  var validationErrors = req.validationErrors();
-  if (validationErrors) {
-    res.status(404).json({
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
       error: true,
-      message: "Wrong ID is Passed",
-      status: 404,
+      message: "Invalid param: ID must be a valid MongoDB ObjectId",
+      status: 400,
     });
-  } else {
-    ClientDal.get(
-      {
-        _id: id,
-      },
-      function (err, doc) {
-        if (doc._id) {
-          req.doc = doc;
-          next();
-        } else {
-          res.status(404).json({
-            error: true,
-            status: 404,
-            msg: "ClientDal _id " + id + " not found",
-          });
-        }
-      }
-    );
   }
+  ClientDal.get(
+    {
+      _id: id,
+    },
+    function (err, doc) {
+      if (doc._id) {
+        req.doc = doc;
+        next();
+      } else {
+        res.status(404).json({
+          error: true,
+          status: 404,
+          msg: "ClientDal _id " + id + " not found",
+        });
+      }
+    }
+  );
 };
 exports.fetch = (req, res, next) => {
   let query = {};

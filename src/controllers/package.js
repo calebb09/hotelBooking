@@ -6,6 +6,7 @@ const BalanceDal = require("../dal/wallet");
 const TransactionDal = require("../dal/transaction");
 const ProfitDal = require("../dal/profit");
 const now = new Date();
+const mongoose = require("mongoose");
 function calculateFutureDate(duration, unit) {
   // Input validation (optional)
   if (isNaN(duration) || !unit) {
@@ -31,36 +32,33 @@ function calculateFutureDate(duration, unit) {
 
 exports.validatePackage = function validatePackage(req, res, next, id) {
   //Validate the id is mongoid or not
-  req.checkParams("id", "Invalid param").isMongoId(id);
-  var validationErrors = req.validationErrors();
-  if (validationErrors) {
-    res.status(404).json({
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
       error: true,
-      message: "Not Found",
-      status: 404,
+      message: "Invalid param: ID must be a valid MongoDB ObjectId",
+      status: 400,
     });
-  } else {
-    PackageDal.get(
-      {
-        _id: id,
-      },
-      function (err, doc) {
-        if (err) {
-          return next(err);
-        }
-        if (doc._id) {
-          req.doc = doc;
-          next();
-        } else {
-          res.status(404).json({
-            error: true,
-            status: 404,
-            msg: "Package _id " + id + " not found",
-          });
-        }
-      }
-    );
   }
+  PackageDal.get(
+    {
+      _id: id,
+    },
+    function (err, doc) {
+      if (err) {
+        return next(err);
+      }
+      if (doc._id) {
+        req.doc = doc;
+        next();
+      } else {
+        res.status(404).json({
+          error: true,
+          status: 404,
+          msg: "Package _id " + id + " not found",
+        });
+      }
+    }
+  );
 };
 
 exports.fetchAll = (req, res, next) => {

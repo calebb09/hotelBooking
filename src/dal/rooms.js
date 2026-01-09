@@ -1,16 +1,11 @@
-"use strict";
+"use strict"; // Added: Strict mode for better error handling
 const _ = require("lodash");
-const debug = require("debug")("api:dal-BankAccount");
+const debug = require("debug")("api:dal-rooms"); // Fixed: Updated debug name to match model (was "BankAccount")
 const Room = require("../models/rooms");
 const user = require("../models/user");
-const RoomType = require("../models/room_type");
 const SubRoomType = require("../models/subRoomType");
 const Client = require("../models/client");
-const Rate = require("../models/ratings");
-const Accommodation = require("../models/accommodation");
-const AccommodationT = require("../models/accommodation_type");
 const Booking = require("../models/booking");
-const Facility = require("../models/facilities");
 const Internal = require("../models/internal");
 const population = [
   {
@@ -41,6 +36,7 @@ const population = [
     populate: [
       {
         path: "created_by",
+        model: user, // Added: Model for created_by to fix potential populate issue
         populate: [
           {
             path: "client",
@@ -53,81 +49,58 @@ const population = [
 ];
 
 exports.create = function create(RoomData, cb) {
-  var RoomModel = new Room(RoomData);
-  RoomModel.save(function saveRoom(err, data) {
-    if (err) {
-      return cb(err);
-    }
-    exports.get(
-      {
-        _id: data._id,
-      },
-      function (err, doc) {
-        if (err) {
-          return cb(err);
-        }
-        cb(null, doc);
-      }
-    );
-  });
+  const RoomModel = new Room(RoomData);
+  RoomModel.save()
+    .then((data) => {
+      // Fetch the populated doc after save
+      return exports.get({_id: data._id}, cb); // Reuse the updated `get` method
+    })
+    .catch((err) => cb(err));
 };
 
 exports.delete = function deleteItem(query, cb) {
   Room.findOne(query)
     .populate(population)
-    .exec(function deleteRoom(err, doc) {
-      if (err) {
-        return cb(err);
-      }
+    .exec() // 👈 Now Promise-based
+    .then((doc) => {
       if (!doc) {
         return cb(null, {});
       }
-      Room.deleteOne(query, function (err) {
-        if (err) {
-          return cb(err);
-        }
-        cb(null, doc);
-      });
-    });
+      return Room.deleteOne(query)
+        .exec()
+        .then(() => doc);
+    })
+    .then((doc) => cb(null, doc))
+    .catch((err) => cb(err));
 };
 
 exports.update = function update(query, updates, cb) {
-  var now = new Date();
-  var opts = {
-    new: true,
-  };
+  const now = new Date();
+  const opts = {new: true};
+
   Room.findOneAndUpdate(query, updates, opts)
-    .populate(population)
-    .exec(function updateRoom(err, doc) {
-      if (err) {
-        return cb(err);
-      }
-      cb(null, doc || {});
-    });
+    .populate(population) // Chain populate after findOneAndUpdate
+    .exec() // 👈 Promise-based
+    .then((doc) => cb(null, doc || {}))
+    .catch((err) => cb(err));
 };
 
 exports.get = function get(query, cb) {
   Room.findOne(query)
     .populate(population)
     .sort({_id: -1})
-    .exec(function (err, doc) {
-      if (err) {
-        return cb(err);
-      }
-      cb(null, doc || {});
-    });
+    .exec() // 👈 Promise-based (fixes the error here!)
+    .then((doc) => cb(null, doc || {}))
+    .catch((err) => cb(err));
 };
 
 exports.getCollection = function getCollection(query, opt, cb) {
   Room.find(query, {}, opt)
     .populate(population)
     .sort({_id: -1})
-    .exec(function getRoomsCollection(err, doc) {
-      if (err) {
-        return cb(err);
-      }
-      return cb(null, doc);
-    });
+    .exec() // 👈 Promise-based
+    .then((doc) => cb(null, doc))
+    .catch((err) => cb(err));
 };
 
 exports.getCollectionByPagination = function getCollectionByPagination(
@@ -135,24 +108,26 @@ exports.getCollectionByPagination = function getCollectionByPagination(
   qs,
   cb
 ) {
-  debug("fetching a collection of accomoodations");
-  var opts = {
-    // columns:  returnFields,
+  debug("fetching a collection of rooms"); // Fixed: Updated log message and typo
+
+  const opts = {
+    // columns: returnFields,  // Uncomment if needed
     sort: qs.sort,
     populate: population,
     page: qs.page,
     limit: qs.limit,
   };
 
-  Room.paginate(query, opts, function (err, docs, page, countDocuments) {
-    if (err) {
-      return cb(err);
-    }
-    var data = {
-      total_pages: page,
-      total_docs_count: countDocuments,
-      docs: docs,
-    };
-    cb(null, data);
-  });
+  // 👈 Fixed: No callback; use .then() on the Promise
+  Room.paginate(query, opts)
+    .then((result) => {
+      // Structure matches your old callback (docs, page, total_docs_count)
+      const data = {
+        docs: result.docs,
+        total_pages: result.totalPages,
+        total_docs_count: result.totalDocs,
+      };
+      cb(null, data);
+    })
+    .catch((err) => cb(err));
 };

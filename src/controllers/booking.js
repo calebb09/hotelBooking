@@ -1,6 +1,6 @@
 // Load Module Dependencies
 const async = require("async");
-const jwtDecode = require("jwt-decode");
+const {jwtDecode} = require("jwt-decode");
 const BookingDal = require("../dal/booking");
 const BookMdl = require("../models/booking");
 const Transaction = require("../models/transaction");
@@ -28,39 +28,36 @@ const HoldPayment = require("../models/pendingPayment");
 
 const Broker = require("../utils/broker");
 const now = new Date();
+const mongoose = require("mongoose");
 
 exports.validateBooking = function validateBooking(req, res, next, id) {
-  //Validate the id is mongoid or not
-  req.checkParams("id", "Invalid param").isMongoId(id);
-  var validationErrors = req.validationErrors();
-  if (validationErrors) {
-    res.status(404).json({
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
       error: true,
-      message: "Not Found",
-      status: 404,
+      message: "Invalid param: ID must be a valid MongoDB ObjectId",
+      status: 400,
     });
-  } else {
-    BookingDal.get(
-      {
-        _id: id,
-      },
-      function (err, doc) {
-        if (err) {
-          return next(err);
-        }
-        if (doc._id) {
-          req.doc = doc;
-          next();
-        } else {
-          res.status(404).json({
-            error: true,
-            status: 404,
-            msg: "Booking _id " + id + " not found",
-          });
-        }
-      }
-    );
   }
+  BookingDal.get(
+    {
+      _id: id,
+    },
+    function (err, doc) {
+      if (err) {
+        return next(err);
+      }
+      if (doc._id) {
+        req.doc = doc;
+        next();
+      } else {
+        res.status(404).json({
+          error: true,
+          status: 404,
+          msg: "Booking _id " + id + " not found",
+        });
+      }
+    }
+  );
 };
 exports.fetchAll = async function fetchAll(req, res, next) {
   let page = req.query.page * 1 || 1;

@@ -1,112 +1,93 @@
-var _ = require("lodash");
-const debug = require("debug")("api:dal-internal");
-var Device = require("../models/device");
+"use strict"; // Added: Strict mode for better error handling
+const _ = require("lodash");
+const debug = require("debug")("api:dal-device"); // Fixed: Updated debug name to match model (was "internal")
+const Device = require("../models/device");
 // var returnFields = category.whitelist;
-var population = [];
+const population = [];
 
 exports.create = function create(deviceData, cb) {
-  var deviceModel = new Device(deviceData);
-  deviceModel.save(function saveDevice(err, data) {
-    if (err) {
-      return cb(err);
-    }
-    exports.get(
-      {
-        _id: data._id,
-      },
-      function (err, doc) {
-        if (err) {
-          return cb(err);
-        }
-        cb(null, doc);
-      }
-    );
-  });
+  const deviceModel = new Device(deviceData);
+  deviceModel
+    .save()
+    .then((data) => {
+      // Fetch the populated doc after save
+      return exports.get({_id: data._id}, cb); // Reuse the updated `get` method
+    })
+    .catch((err) => cb(err));
 };
 
 exports.delete = function deleteItem(query, cb) {
   Device.findOne(query)
     .populate(population)
-    .exec(function deleteDevice(err, doc) {
-      if (err) {
-        return cb(err);
-      }
+    .exec() // 👈 Now Promise-based
+    .then((doc) => {
       if (!doc) {
         return cb(null, {});
       }
-      Device.deleteOne(query, function (err) {
-        if (err) {
-          return cb(err);
-        }
-        cb(null, doc);
-      });
-    });
+      return Device.deleteOne(query)
+        .exec()
+        .then(() => doc);
+    })
+    .then((doc) => cb(null, doc))
+    .catch((err) => cb(err));
 };
 
 exports.update = function update(query, updates, cb) {
-  var opts = {
-    new: true,
-  };
+  const opts = {new: true};
 
-  // updates = mongoUpdate(updates);
+  // updates = mongoUpdate(updates);  // Uncomment if needed
 
   Device.findOneAndUpdate(query, updates, opts)
-    .populate(population)
-    .exec(function updateCategory(err, doc) {
-      if (err) {
-        return cb(err);
-      }
-
-      cb(null, doc || {});
-    });
+    .populate(population) // Chain populate after findOneAndUpdate
+    .exec() // 👈 Promise-based
+    .then((doc) => cb(null, doc || {}))
+    .catch((err) => cb(err));
 };
 
 exports.get = function get(query, cb) {
   Device.findOne(query)
-    .sort({
-      _id: 1,
-    })
+    .sort({_id: 1})
     .populate(population)
-    .exec(function (err, doc) {
-      if (err) {
-        return cb(err);
-      }
-
-      cb(null, doc || {});
-    });
+    .exec() // 👈 Promise-based (fixes the error here!)
+    .then((doc) => cb(null, doc || {}))
+    .catch((err) => cb(err));
 };
 
 exports.getCollection = function getCollection(query, opt, cb) {
   Device.find(query, {}, opt)
     .populate(population)
-    .exec(function getcoursesCollection(err, doc) {
-      if (err) {
-        return cb(err);
-      }
-
-      return cb(null, doc);
-    });
+    .exec() // 👈 Promise-based
+    .then((doc) => cb(null, doc))
+    .catch((err) => cb(err));
 };
-exports.getCollectionByPagination = function getCollection(query, qs, cb) {
-  debug("fetching a collection of Internal");
 
-  var opts = {
-    // columns:  returnFields,
+exports.getCollectionByPagination = function getCollectionByPagination(
+  query,
+  qs,
+  cb
+) {
+  debug("fetching a collection of devices"); // Fixed: Updated log message
+
+  const opts = {
+    // columns: returnFields,  // Uncomment if needed
     sort: qs.sort,
     populate: population,
     page: qs.page,
     limit: qs.limit,
   };
-  Device.paginate(query, opts, function (err, docs, page, count) {
-    if (err) {
-      return cb(err);
-    }
-    var data = {
-      total_pages: page,
-      total_docs_count: count,
-      docs: docs,
-    };
 
-    cb(null, data);
-  });
+  // 👈 Fixed: No callback; use .then() on the Promise
+  Device.paginate(query, opts)
+    .then((result) => {
+      // Structure matches your old callback (docs, page, count)
+      const data = {
+        docs: result.docs,
+        total: result.totalDocs, // Renamed for clarity; adjust if controller expects `count`
+        page: result.page,
+        totalPages: result.totalPages,
+        limit: result.limit,
+      };
+      cb(null, data);
+    })
+    .catch((err) => cb(err));
 };

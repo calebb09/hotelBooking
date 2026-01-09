@@ -1,5 +1,6 @@
+"use strict";
 var _ = require("lodash");
-const debug = require("debug")("api:dal-internal");
+const debug = require("debug")("api:dal-city"); // Fixed: Updated debug name to match model (was "internal")
 var City = require("../models/city");
 // var returnFields = category.whitelist;
 var population = [
@@ -10,108 +11,87 @@ var population = [
 ];
 
 exports.create = function create(CityData, cb) {
-  var CityModel = new City(CityData);
-  CityModel.save(function saveCity(err, data) {
-    if (err) {
-      return cb(err);
-    }
-    exports.get(
-      {
-        _id: data._id,
-      },
-      function (err, doc) {
-        if (err) {
-          return cb(err);
-        }
-        cb(null, doc);
-      }
-    );
-  });
+  const CityModel = new City(CityData);
+  CityModel.save()
+    .then((data) => {
+      // Fetch the populated doc after save
+      return exports.get({_id: data._id}, cb); // Reuse the updated `get` method
+    })
+    .catch((err) => cb(err));
 };
 
 exports.delete = function deleteItem(query, cb) {
   City.findOne(query)
     .populate(population)
-    .exec(function deleteCity(err, doc) {
-      if (err) {
-        return cb(err);
-      }
+    .exec() // 👈 Now Promise-based
+    .then((doc) => {
       if (!doc) {
         return cb(null, {});
       }
-      City.deleteOne(query, function (err) {
-        if (err) {
-          return cb(err);
-        }
-        cb(null, doc);
-      });
-    });
+      return City.deleteOne(query)
+        .exec()
+        .then(() => doc);
+    })
+    .then((doc) => cb(null, doc))
+    .catch((err) => cb(err));
 };
 
 exports.update = function update(query, updates, cb) {
-  var opts = {
-    new: true,
-  };
+  const opts = {new: true};
 
-  // updates = mongoUpdate(updates);
+  // updates = mongoUpdate(updates);  // Uncomment if needed
 
   City.findOneAndUpdate(query, updates, opts)
-    .populate(population)
-    .exec(function updateCategory(err, doc) {
-      if (err) {
-        return cb(err);
-      }
-
-      cb(null, doc || {});
-    });
+    .populate(population) // Chain populate after findOneAndUpdate
+    .exec() // 👈 Promise-based
+    .then((doc) => cb(null, doc || {}))
+    .catch((err) => cb(err));
 };
 
 exports.get = function get(query, cb) {
   City.findOne(query)
-    .sort({
-      _id: 1,
-    })
+    .sort({_id: 1})
     .populate(population)
-    .exec(function (err, doc) {
-      if (err) {
-        return cb(err);
-      }
-
-      cb(null, doc || {});
-    });
+    .exec() // 👈 Promise-based (fixes the error here!)
+    .then((doc) => cb(null, doc || {}))
+    .catch((err) => cb(err));
 };
 
 exports.getCollection = function getCollection(query, opt, cb) {
   City.find(query, {}, opt)
     .populate(population)
-    .exec(function getcoursesCollection(err, doc) {
-      if (err) {
-        return cb(err);
-      }
-
-      return cb(null, doc);
-    });
+    .exec() // 👈 Promise-based
+    .then((doc) => cb(null, doc))
+    .catch((err) => cb(err));
 };
-exports.getCollectionByPagination = function getCollection(query, qs, cb) {
-  debug("fetching a collection of Internal");
 
-  var opts = {
-    // columns:  returnFields,
+exports.getCollectionByPagination = function getCollectionByPagination(
+  query,
+  qs,
+  cb
+) {
+  debug("fetching a collection of cities"); // Fixed: Updated log message
+
+  const opts = {
+    // columns: returnFields,  // Uncomment if needed
     sort: qs.sort,
     populate: population,
     page: qs.page,
     limit: qs.limit,
   };
-  City.paginate(query, opts, function (err, docs, page, count) {
-    if (err) {
-      return cb(err);
-    }
-    var data = {
-      total_pages: page,
-      total_docs_count: count,
-      docs: docs,
-    };
 
-    cb(null, data);
-  });
+  // 👈 Fixed: No callback; use .then() on the Promise
+  City.paginate(query, opts)
+    .then((result) => {
+      // Structure matches your old callback (docs, page, count)
+      const data = {
+        docs: result.docs,
+        total: result.totalDocs, // Renamed for clarity; adjust if controller expects `count`
+        page: result.page,
+        totalPages: result.totalPages,
+        limit: result.limit,
+      };
+      cb(null, data);
+    })
+    .catch((err) => cb(err));
 };

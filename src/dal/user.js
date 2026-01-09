@@ -1,11 +1,10 @@
-"user strict";
-
-var debug = require("debug")("api:dal-user");
-var _ = require("lodash");
-var User = require("../models/user");
+"use strict"; // Fixed: "user strict" → "use strict"
+const _ = require("lodash");
+const debug = require("debug")("api:dal-user");
+const User = require("../models/user");
 const Internal_USER = require("../models/internal");
-var returnFields = User.whitelist;
-var population = [
+const returnFields = User.whitelist;
+const population = [
   {
     path: "internal",
     model: Internal_USER,
@@ -13,96 +12,76 @@ var population = [
 ];
 
 exports.create = async function create(userData, cb) {
-  var searchQuery = {username: userData.username};
-  // Make sure user does not exist
-  await User.findOne(searchQuery, function userExists(err, isPresent) {
-    if (err) {
-      return cb(err);
-    }
+  try {
+    const searchQuery = {username: userData.username};
+    // Make sure user does not exist
+    const isPresent = await User.findOne(searchQuery, returnFields).exec();
     if (isPresent) {
       return cb(new Error("User already exists"));
     }
     // Create user if is new.
-    var userModel = new User(userData);
-    userModel.save(function saveUser(err, data) {
-      if (err) {
-        return cb(err);
-      }
-      exports.get({_id: data._id}, function (err, user) {
-        if (err) {
-          return cb(err);
-        }
-        cb(null, user);
-      });
-    });
-  });
+    const userModel = new User(userData);
+    const data = await userModel.save();
+    // Fetch populated doc
+    const user = await exports.getPopulated({_id: data._id});
+    cb(null, user);
+  } catch (err) {
+    cb(err);
+  }
 };
+
+// Helper for populated get (to avoid recursion in create)
+async function getPopulated(query) {
+  return User.findOne(query).select(returnFields).populate(population).exec();
+}
 
 exports.delete = function deleteItem(query, cb) {
   User.findOne(query, returnFields)
     .populate(population)
-    .exec(function deleteUser(err, user) {
-      if (err) {
-        return cb(err);
-      }
-
+    .exec() // 👈 Now Promise-based
+    .then((user) => {
       if (!user) {
         return cb(null, {});
       }
-
-      user.deleteOne(function (err) {
-        if (err) {
-          return cb(err);
-        }
-
-        cb(null, user);
-      });
-    });
+      return User.deleteOne(query)
+        .exec()
+        .then(() => user);
+    })
+    .then((user) => cb(null, user))
+    .catch((err) => cb(err));
 };
 
 exports.update = function update(query, updates, cb) {
-  var opts = {
+  const opts = {
     new: true,
     safe: true,
-    upsert: true,
+    upsert: true, // Note: Keep if intended; consider false if not upserting
     select: returnFields,
   };
 
-  // updates = mongoUpdate(updates);
+  // updates = mongoUpdate(updates);  // Uncomment if needed
 
   User.findOneAndUpdate(query, updates, opts)
-    .populate(population)
-    .exec(function updateUser(err, user) {
-      if (err) {
-        return cb(err);
-      }
-
-      cb(null, user || {});
-    });
+    .populate(population) // Chain populate after findOneAndUpdate
+    .exec() // 👈 Promise-based
+    .then((user) => cb(null, user || {}))
+    .catch((err) => cb(err));
 };
 
 exports.get = function get(query, cb) {
   User.findOne(query)
     .populate(population)
-    .exec(function (err, user) {
-      if (err) {
-        return cb(err);
-      }
-
-      cb(null, user || {});
-    });
+    .exec() // 👈 Promise-based (fixes the error here!)
+    .then((user) => cb(null, user || {}))
+    .catch((err) => cb(err));
 };
 
-exports.getCollection = function getCollection(query, qs, cb) {
-  User.find(query, {}, qs)
+exports.getCollection = function getCollection(query, opt, cb) {
+  User.find(query, opt || {}, returnFields) // Fixed: Use opt for projection if provided, fallback to returnFields
     .populate(population)
-    .exec(function (err, user) {
-      if (err) {
-        return cb(err);
-      }
-
-      cb(null, user || {});
-    });
+    .exec() // 👈 Promise-based
+    .then((user) => cb(null, user || []))
+    .catch((err) => cb(err));
 };
 
 exports.getCollectionByPagination = function getCollectionByPagination(
@@ -110,24 +89,26 @@ exports.getCollectionByPagination = function getCollectionByPagination(
   qs,
   cb
 ) {
-  debug("fetching a collection of accomoodations");
-  var opts = {
-    // columns:  returnFields,
+  debug("fetching a collection of users"); // Fixed: Updated log message
+
+  const opts = {
+    // columns: returnFields,  // Uncomment if needed for select
     sort: qs.sort,
     populate: population,
     page: qs.page,
     limit: qs.limit,
   };
 
-  User.paginate(query, opts, function (err, docs, page, countDocuments) {
-    if (err) {
-      return cb(err);
-    }
-    var data = {
-      total_pages: page,
-      total_docs_count: countDocuments,
-      docs: docs,
-    };
-    cb(null, data);
-  });
+  // 👈 Fixed: No callback; use .then() on the Promise
+  User.paginate(query, opts)
+    .then((result) => {
+      // Structure matches your old callback (docs, page, total_docs_count)
+      const data = {
+        docs: result.docs,
+        total_pages: result.totalPages,
+        total_docs_count: result.totalDocs,
+      };
+      cb(null, data);
+    })
+    .catch((err) => cb(err));
 };

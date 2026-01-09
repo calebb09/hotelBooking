@@ -10,39 +10,35 @@ const UserDal = require("../dal/user");
 const InternalDal = require("../dal/internal");
 const ClientDal = require("../dal/client");
 const sendMessage = require("../functions/sendMessage");
-
+const mongoose = require("mongoose");
 exports.validateUser = function validateUser(req, res, next, id) {
-  //Validate the id is mongoid or not
-  req.checkParams("id", "Invalid param").isMongoId(id);
-  var validationErrors = req.validationErrors();
-  if (validationErrors) {
-    res.status(404).json({
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
       error: true,
-      message: "Not Found",
-      status: 404,
+      message: "Invalid param: ID must be a valid MongoDB ObjectId",
+      status: 400,
     });
-  } else {
-    UserDal.get(
-      {
-        _id: id,
-      },
-      function (err, doc) {
-        if (err) {
-          return next(err);
-        }
-        if (doc._id) {
-          req.doc = doc;
-          next();
-        } else {
-          res.status(404).json({
-            error: true,
-            status: 404,
-            msg: "User _id " + id + " not found",
-          });
-        }
-      }
-    );
   }
+  UserDal.get(
+    {
+      _id: id,
+    },
+    function (err, doc) {
+      if (err) {
+        return next(err);
+      }
+      if (doc._id) {
+        req.doc = doc;
+        next();
+      } else {
+        res.status(404).json({
+          error: true,
+          status: 404,
+          msg: "User _id " + id + " not found",
+        });
+      }
+    }
+  );
 };
 exports.getUserInfo = function (req, res, next) {
   UserDal.get({_id: req._user._id}, (err, docs) => {

@@ -31,41 +31,37 @@ const {model} = require("mongoose");
 let message = {};
 let email_lists = [];
 let output_response = [];
-
+const mogoose = require("mongoose");
 // let account_status = false;
 /** service charge based on the number of booking plus in the profit section find a way to handle the room price error */
 exports.validateTransaction = function validateTransaction(req, res, next, id) {
-  //Validate the id is mongoid or not
-  req.checkParams("id", "Invalid param").isMongoId(id);
-  var validationErrors = req.validationErrors();
-  if (validationErrors) {
-    res.status(404).json({
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
       error: true,
-      message: "Not Found",
-      status: 404,
+      message: "Invalid param: ID must be a valid MongoDB ObjectId",
+      status: 400,
     });
-  } else {
-    TransactionDal.get(
-      {
-        _id: id,
-      },
-      function (err, doc) {
-        if (err) {
-          return next(err);
-        }
-        if (doc._id) {
-          req.doc = doc;
-          next();
-        } else {
-          res.status(404).json({
-            error: true,
-            status: 404,
-            msg: "Transaction _id " + id + " not found",
-          });
-        }
-      }
-    );
   }
+  TransactionDal.get(
+    {
+      _id: id,
+    },
+    function (err, doc) {
+      if (err) {
+        return next(err);
+      }
+      if (doc._id) {
+        req.doc = doc;
+        next();
+      } else {
+        res.status(404).json({
+          error: true,
+          status: 404,
+          msg: "Transaction _id " + id + " not found",
+        });
+      }
+    }
+  );
 };
 exports.verifyPayment = async (req, res) => {
   const checkChapa = await Chapa.findById(req.params.chapaId).populate({

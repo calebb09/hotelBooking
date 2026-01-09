@@ -2,46 +2,42 @@
 const async = require("async");
 const hbs = require("nodemailer-express-handlebars");
 const path = require("path");
-const jwtDecode = require("jwt-decode");
+const {jwtDecode} = require("jwt-decode");
 const NotifiDal = require("../dal/notification");
 const Device = require("../models/device");
 const Client = require("../models/client");
 const User = require("../models/user");
 const config = require("../../config");
 const now = Date.now;
-
+const mongoose = require("mongoose");
 exports.validateNotifi = function validateNotifi(req, res, next, id) {
-  //Validate the id is mongoid or not
-  req.checkParams("id", "Invalid param").isMongoId(id);
-  var validationErrors = req.validationErrors();
-  if (validationErrors) {
-    res.status(404).json({
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
       error: true,
-      message: "Not Found",
-      status: 404,
+      message: "Invalid param: ID must be a valid MongoDB ObjectId",
+      status: 400,
     });
-  } else {
-    NotifiDal.get(
-      {
-        _id: id,
-      },
-      function (err, doc) {
-        if (err) {
-          return next(err);
-        }
-        if (doc._id) {
-          req.doc = doc;
-          next();
-        } else {
-          res.status(404).json({
-            error: true,
-            status: 404,
-            msg: "Notifi _id " + id + " not found",
-          });
-        }
-      }
-    );
   }
+  NotifiDal.get(
+    {
+      _id: id,
+    },
+    function (err, doc) {
+      if (err) {
+        return next(err);
+      }
+      if (doc._id) {
+        req.doc = doc;
+        next();
+      } else {
+        res.status(404).json({
+          error: true,
+          status: 404,
+          msg: "Notifi _id " + id + " not found",
+        });
+      }
+    }
+  );
 };
 exports.fetchAll = function fetchAll(req, res, next) {
   let page = parseInt(req.query.page);

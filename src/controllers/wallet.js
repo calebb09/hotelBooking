@@ -6,39 +6,35 @@ const async = require("async"),
   TransactionDal = require("../dal/transaction"),
   WalletBalance = require("../models/wallet"),
   Transaction = require("../models/transaction");
-
+const mongoose = require("mongoose");
 exports.validateWallet = function validateWallet(req, res, next, id) {
-  //Validate the id is mongoid or not
-  req.checkParams("id", "Invalid param").isMongoId(id);
-  var validationErrors = req.validationErrors();
-  if (validationErrors) {
-    res.status(404).json({
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
       error: true,
-      message: "Not Found",
-      status: 404,
+      message: "Invalid param: ID must be a valid MongoDB ObjectId",
+      status: 400,
     });
-  } else {
-    TransactionDal.get(
-      {
-        _id: id,
-      },
-      function (err, doc) {
-        if (err) {
-          return next(err);
-        }
-        if (doc._id) {
-          req.doc = doc;
-          next();
-        } else {
-          res.status(404).json({
-            error: true,
-            status: 404,
-            msg: "Wallet _id " + id + " not found",
-          });
-        }
-      }
-    );
   }
+  TransactionDal.get(
+    {
+      _id: id,
+    },
+    function (err, doc) {
+      if (err) {
+        return next(err);
+      }
+      if (doc._id) {
+        req.doc = doc;
+        next();
+      } else {
+        res.status(404).json({
+          error: true,
+          status: 404,
+          msg: "Wallet _id " + id + " not found",
+        });
+      }
+    }
+  );
 };
 exports.showWallets = async (req, res, next) => {
   let yourId = await Client.findOne({uuid: req.user.uuid});

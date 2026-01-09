@@ -1,35 +1,32 @@
 // Load Module Dependencies
 const DeviceDal = require("../dal/device");
 const _ = require("lodash");
-
+const mongoose = require("mongoose");
 exports.validateDevice = function validateDevice(req, res, next, id) {
-  req.checkParams("id", "Invalid param").isMongoId(id);
-  var validationErrors = req.validationErrors();
-  if (validationErrors) {
-    res.status(404).json({
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
       error: true,
-      message: "Not Found",
-      status: 404,
+      message: "Invalid param: ID must be a valid MongoDB ObjectId",
+      status: 400,
     });
-  } else {
-    DeviceDal.get(
-      {
-        _id: id,
-      },
-      function (err, doc) {
-        if (doc._id) {
-          req.doc = doc;
-          next();
-        } else {
-          res.status(404).json({
-            error: true,
-            status: 404,
-            msg: "Device _id " + id + " not found",
-          });
-        }
-      }
-    );
   }
+  DeviceDal.get(
+    {
+      _id: id,
+    },
+    function (err, doc) {
+      if (doc._id) {
+        req.doc = doc;
+        next();
+      } else {
+        res.status(404).json({
+          error: true,
+          status: 404,
+          msg: "Device _id " + id + " not found",
+        });
+      }
+    }
+  );
 };
 
 exports.fetchAll = async (req, res, next) => {

@@ -1,5 +1,6 @@
+"use strict"; // Added: Strict mode for better error handling
 const _ = require("lodash");
-const debug = require("debug")("api:dal-user");
+const debug = require("debug")("api:dal-ratings"); // Fixed: Updated debug name to match model (was "user")
 const Rate = require("../models/ratings");
 const Room = require("../models/rooms");
 const Client = require("../models/client");
@@ -29,87 +30,58 @@ const population = [
 ];
 
 exports.create = function create(RateData, cb) {
-  var RateModel = new Rate(RateData);
-  RateModel.save(function saveRate(err, data) {
-    if (err) {
-      return cb(err);
-    }
-    exports.get(
-      {
-        _id: data._id,
-      },
-      function (err, doc) {
-        if (err) {
-          return cb(err);
-        }
-        cb(null, doc);
-      }
-    );
-  });
+  const RateModel = new Rate(RateData);
+  RateModel.save()
+    .then((data) => {
+      // Fetch the populated doc after save
+      return exports.get({_id: data._id}, cb); // Reuse the updated `get` method
+    })
+    .catch((err) => cb(err));
 };
 
 exports.delete = function deleteItem(query, cb) {
   Rate.findOne(query)
     .populate(population)
-    .exec(function deleteRate(err, doc) {
-      if (err) {
-        return cb(err);
-      }
+    .exec() // 👈 Now Promise-based
+    .then((doc) => {
       if (!doc) {
         return cb(null, {});
       }
-      Rate.deleteOne(query, function (err) {
-        if (err) {
-          return cb(err);
-        }
-        cb(null, doc);
-      });
-    });
+      return Rate.deleteOne(query)
+        .exec()
+        .then(() => doc);
+    })
+    .then((doc) => cb(null, doc))
+    .catch((err) => cb(err));
 };
 
 exports.update = function update(query, updates, cb) {
-  var opts = {
-    new: true,
-  };
+  const opts = {new: true};
 
-  // updates = mongoUpdate(updates);
+  // updates = mongoUpdate(updates);  // Uncomment if needed
 
   Rate.findOneAndUpdate(query, updates, opts)
-    .populate(population)
-    .exec(function updateCategory(err, doc) {
-      if (err) {
-        return cb(err);
-      }
-
-      cb(null, doc || {});
-    });
+    .populate(population) // Chain populate after findOneAndUpdate
+    .exec() // 👈 Promise-based
+    .then((doc) => cb(null, doc || {}))
+    .catch((err) => cb(err));
 };
 
 exports.get = function get(query, cb) {
   Rate.findOne(query)
-    .sort({
-      _id: 1,
-    })
+    .sort({_id: 1})
     .populate(population)
-    .exec(function (err, doc) {
-      if (err) {
-        return cb(err);
-      }
-
-      cb(null, doc || {});
-    });
+    .exec() // 👈 Promise-based (fixes the error here!)
+    .then((doc) => cb(null, doc || {}))
+    .catch((err) => cb(err));
 };
 
 exports.getCollection = function getCollection(query, opt, cb) {
   Rate.find(query, {}, opt)
     .populate(population)
-    .exec(function getcoursesCollection(err, doc) {
-      if (err) {
-        return cb(err);
-      }
-
-      return cb(null, doc);
-    });
+    .exec() // 👈 Promise-based
+    .then((doc) => cb(null, doc))
+    .catch((err) => cb(err));
 };
 
 exports.getCollectionByPagination = function getCollectionByPagination(
@@ -117,24 +89,26 @@ exports.getCollectionByPagination = function getCollectionByPagination(
   qs,
   cb
 ) {
-  debug("fetching a collection of Rate");
-  var opts = {
-    // columns:  returnFields,
+  debug("fetching a collection of ratings"); // Fixed: Updated log message
+
+  const opts = {
+    // columns: returnFields,  // Uncomment if needed
     sort: qs.sort,
     populate: population,
     page: qs.page,
     limit: qs.limit,
   };
 
-  Rate.paginate(query, opts, function (err, docs, page, countDocuments) {
-    if (err) {
-      return cb(err);
-    }
-    var data = {
-      total_pages: page,
-      total_docs_count: countDocuments,
-      docs: docs,
-    };
-    cb(null, data);
-  });
+  // 👈 Fixed: No callback; use .then() on the Promise
+  Rate.paginate(query, opts)
+    .then((result) => {
+      // Structure matches your old callback (docs, page, total_docs_count)
+      const data = {
+        docs: result.docs,
+        total_pages: result.totalPages,
+        total_docs_count: result.totalDocs,
+      };
+      cb(null, data);
+    })
+    .catch((err) => cb(err));
 };

@@ -11,6 +11,9 @@ const AccommodationDal = require("../dal/accommodation");
 const City = require("../models/city");
 const amadeusAccessToken = require("../services/amadeus");
 
+const roomType = require("../models/room_type");
+const facilities = require("../models/facilities");
+
 const subRoomType = require("../models/subRoomType");
 const Property = require("../models/accommodation");
 const config = require("../../config");
@@ -27,43 +30,38 @@ const post2telegram = require("../services/telegram");
 const jwt = require("jsonwebtoken");
 const findAvailableAccommodations = require("../utils/searchHotels");
 const mongoose = require("mongoose");
+
 exports.validateAccommodation = function validateAccommodation(
   req,
   res,
   next,
   id
 ) {
-  //Validate the id is mongoid or not
-  req.checkParams("id", "Invalid param").isMongoId(id);
-  var validationErrors = req.validationErrors();
-  if (validationErrors) {
-    res.status(404).json({
+  // Manually validate if id is a valid MongoDB ObjectId
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
       error: true,
-      message: "Not Found",
-      status: 404,
+      message: "Invalid param: ID must be a valid MongoDB ObjectId",
+      status: 400,
     });
-  } else {
-    AccommodationDal.get(
-      {
-        _id: id,
-      },
-      function (err, doc) {
-        if (err) {
-          return next(err);
-        }
-        if (doc._id) {
-          req.doc = doc;
-          next();
-        } else {
-          res.status(404).json({
-            error: true,
-            status: 404,
-            msg: "Accommodation _id " + id + " not found",
-          });
-        }
-      }
-    );
   }
+
+  // Proceed with DAL lookup
+  AccommodationDal.get({_id: id}, function (err, doc) {
+    if (err) {
+      return next(err);
+    }
+    if (doc && doc._id) {
+      req.doc = doc;
+      return next();
+    } else {
+      return res.status(404).json({
+        error: true,
+        status: 404,
+        msg: "Accommodation _id " + id + " not found",
+      });
+    }
+  });
 };
 exports.fetchAll = async function fetchAll(req, res, next) {
   let page = req.query.page * 1 || 1;
@@ -455,6 +453,71 @@ exports.rooms = (req, res, next) => {
   } catch (err) {
     console.error("Server error:", err);
     res.status(500).json({error: "Internal server error"});
+  }
+};
+exports.subRoomType = async (req, res, next) => {
+  try {
+    // Pagination params
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+
+    // Build query
+    const query = {
+      accommodation: req.doc._id,
+      is_verified: true,
+    };
+
+    // Paginate subRoomTypes
+    const options = {
+      page,
+      limit,
+      populate: [
+        {
+          path: "facilities",
+          model: facilities,
+        },
+        {
+          path: "roomType",
+          model: roomType,
+        },
+      ], // Uncommented: populate related fields if needed
+      lean: true, // returns plain JS objects
+    };
+
+    const result = await subRoomType.paginate(query, options);
+
+    // Add room details and counts for each subRoomType
+    const subRoomTypesWithRooms = await Promise.all(
+      result.docs.map(async (sub) => {
+        // Fetch actual room details (not just count)
+        const rooms = await RoomMdl.find({
+          subRoomType: sub._id,
+          is_hidden: false,
+        })
+          // .populate("subRoomType") // Optional: populate back if needed for room details
+          .lean()
+          .exec();
+
+        return {
+          ...sub,
+          rooms, // Attach full room details
+          number_of_rooms: rooms.length, // Derived count
+        };
+      })
+    );
+
+    // Respond
+    res.status(200).json({
+      meta: {
+        page: result.page,
+        limit: result.limit,
+        totalPages: result.totalPages,
+        totalDocs: result.totalDocs,
+      },
+      data: subRoomTypesWithRooms,
+    });
+  } catch (error) {
+    res.status(500).json({msg: error.message});
   }
 };
 exports.fetchOne = function fetchOne(req, res, next) {

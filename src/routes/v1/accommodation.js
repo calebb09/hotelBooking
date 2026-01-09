@@ -540,6 +540,7 @@ router.get("/trending", AccommodationController.trending);
  *                 $ref: '#/components/schemas/AccommodationError'
  */
 router.get("/:id/rooms", AccommodationController.rooms);
+router.get("/:id/subRoomType", AccommodationController.subRoomType);
 /**
  * @swagger
  * /accommodation/{aid}:

@@ -1,9 +1,11 @@
-var _ = require("lodash");
-var Setting = require("../models/settings");
-var User = require("../models/user");
-var Internal = require("../models/internal");
+"use strict"; // Added: Strict mode for better error handling
+const _ = require("lodash");
+const debug = require("debug")("api:dal-settings"); // Fixed: Updated debug name to match model (was missing, assumed "BankAccount" pattern)
+const Setting = require("../models/settings");
+const User = require("../models/user");
+const Internal = require("../models/internal");
 // var returnFields = category.whitelist;
-var population = [
+const population = [
   {
     path: "created_by",
     model: User,
@@ -18,85 +20,56 @@ var population = [
 ];
 
 exports.create = function create(SettingData, cb) {
-  var SettingModel = new Setting(SettingData);
-  SettingModel.save(function saveSetting(err, data) {
-    if (err) {
-      return cb(err);
-    }
-    exports.get(
-      {
-        _id: data._id,
-      },
-      function (err, doc) {
-        if (err) {
-          return cb(err);
-        }
-        cb(null, doc);
-      }
-    );
-  });
+  const SettingModel = new Setting(SettingData);
+  SettingModel.save()
+    .then((data) => {
+      // Fetch the populated doc after save
+      return exports.get({_id: data._id}, cb); // Reuse the updated `get` method
+    })
+    .catch((err) => cb(err));
 };
 
 exports.delete = function deleteItem(query, cb) {
   Setting.findOne(query)
     .populate(population)
-    .exec(function deleteSetting(err, doc) {
-      if (err) {
-        return cb(err);
-      }
+    .exec() // 👈 Now Promise-based
+    .then((doc) => {
       if (!doc) {
         return cb(null, {});
       }
-      Setting.deleteOne(query, function (err) {
-        if (err) {
-          return cb(err);
-        }
-        cb(null, doc);
-      });
-    });
+      return Setting.deleteOne(query)
+        .exec()
+        .then(() => doc);
+    })
+    .then((doc) => cb(null, doc))
+    .catch((err) => cb(err));
 };
 
 exports.update = function update(query, updates, cb) {
-  var opts = {
-    new: true,
-  };
+  const opts = {new: true};
 
-  // updates = mongoUpdate(updates);
+  // updates = mongoUpdate(updates);  // Uncomment if needed
 
   Setting.findOneAndUpdate(query, updates, opts)
-    .populate(population)
-    .exec(function updateCategory(err, doc) {
-      if (err) {
-        return cb(err);
-      }
-
-      cb(null, doc || {});
-    });
+    .populate(population) // Chain populate after findOneAndUpdate
+    .exec() // 👈 Promise-based
+    .then((doc) => cb(null, doc || {}))
+    .catch((err) => cb(err));
 };
 
 exports.get = function get(query, cb) {
   Setting.findOne(query)
-    .sort({
-      _id: 1,
-    })
+    .sort({_id: 1})
     .populate(population)
-    .exec(function (err, doc) {
-      if (err) {
-        return cb(err);
-      }
-
-      cb(null, doc || {});
-    });
+    .exec() // 👈 Promise-based (fixes the error here!)
+    .then((doc) => cb(null, doc || {}))
+    .catch((err) => cb(err));
 };
 
 exports.getCollection = function getCollection(query, opt, cb) {
   Setting.find(query, {}, opt)
     .populate(population)
-    .exec(function getcoursesCollection(err, doc) {
-      if (err) {
-        return cb(err);
-      }
-
-      return cb(null, doc);
-    });
+    .exec() // 👈 Promise-based
+    .then((doc) => cb(null, doc))
+    .catch((err) => cb(err));
 };
