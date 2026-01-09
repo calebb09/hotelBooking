@@ -75,10 +75,10 @@ exports.allUsers = function allUsers(req, res, next) {
       }
 
       res.status(200).json({
-        data: doc.docs.docs,
+        data: doc.docs,
         limit: limit,
         skip: page,
-        total: doc.docs.total,
+        total: doc.total,
       });
     }
   );

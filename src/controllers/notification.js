@@ -57,10 +57,10 @@ exports.fetchAll = function fetchAll(req, res, next) {
           return next(err);
         }
         res.status(200).json({
-          data: notification_doc.docs.docs,
+          data: notification_doc.docs,
           limit: limit,
           skip: page,
-          total: notification_doc.docs.total,
+          total: notification_doc.total,
         });
       }
     );
@@ -96,7 +96,7 @@ exports.showall = async function broadCastedMessages(req, res, next) {
       return next(err);
     }
     async.eachSeries(
-      doc.docs.docs,
+      doc.docs,
       async function (data, callback) {
         if (data.broadCastType === null) {
           list_message.push(data);
@@ -118,7 +118,7 @@ exports.showall = async function broadCastedMessages(req, res, next) {
             data: list_message,
             limit: limit,
             skip: page,
-            total: doc.docs.total,
+            total: doc.total,
           });
         }
       }
@@ -151,7 +151,7 @@ exports.viewAll = async (req, res, next) => {
     }
 
     async.eachSeries(
-      doc.docs.docs,
+      doc.docs,
       async function (data, callback) {
         if (data.broadCastType === null) {
           list_message.push(data);
@@ -173,7 +173,7 @@ exports.viewAll = async (req, res, next) => {
             data: list_message,
             limit: limit,
             skip: page,
-            total: doc.docs.total,
+            total: doc.total,
           });
         }
       }

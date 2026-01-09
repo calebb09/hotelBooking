@@ -22,7 +22,7 @@ function buildResponse(status, statusCode, message, error = null) {
 }
 //gojo reference starting with gojo-recharge
 function isGojoRechargeRef(txt_ref) {
-  return txt_ref.startsWith("gojo-recharge-");
+  return txt_ref.startsWith("triplaye-recharge-");
 }
 //update Transaction function
 async function updateTransaction(

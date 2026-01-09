@@ -78,10 +78,10 @@ exports.hotels = (req, res, next) => {
       return next(err);
     }
     res.status(200).json({
-      data: _.shuffle(doc.docs.docs),
+      data: _.shuffle(doc.docs),
       limit: limit,
       skip: page,
-      total: doc.docs.total,
+      total: doc.total,
     });
   });
 };

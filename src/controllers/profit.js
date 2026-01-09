@@ -44,10 +44,10 @@ exports.fetchAll = (req, res, next) => {
         return next(err);
       }
       res.status(200).json({
-        data: doc.docs.docs,
+        data: doc.docs,
         limit: limit,
         skip: page,
-        total: doc.docs.total,
+        total: doc.total,
         profit: {
           USD: getTotalAmountinUsd(doc.docs),
           ETB: getTotalAmountinETB(doc.docs),

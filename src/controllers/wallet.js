@@ -90,11 +90,11 @@ exports.showWallets = async (req, res, next) => {
 
           // === Send Response ===
           res.status(200).json({
-            data: doc.docs.docs,
+            data: doc.docs,
             limit: limit,
             skip: page,
             balance: balanceObj,
-            total: doc.docs.total,
+            total: doc.total,
           });
         }
       );
@@ -125,15 +125,15 @@ exports.viewWallet = async (req, res, next) => {
       return next(err);
     }
     res.status(200).json({
-      data: doc.docs.docs,
+      data: doc.docs,
       limit: limit,
       skip: page,
       // wallet: current_balance,
       balance: {
-        USD: getTotalAmountinUsd(doc.docs.docs),
-        ETB: getTotalAmountinETB(doc.docs.docs),
+        USD: getTotalAmountinUsd(doc.docs),
+        ETB: getTotalAmountinETB(doc.docs),
       },
-      total: doc.docs.total,
+      total: doc.total,
     });
   });
 };

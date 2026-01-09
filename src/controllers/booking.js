@@ -74,10 +74,10 @@ exports.fetchAll = async function fetchAll(req, res, next) {
         return next(err);
       }
       res.status(200).json({
-        data: doc.docs.docs,
+        data: doc.docs,
         limit: limit,
         skip: page,
-        total: doc.docs.total,
+        total: doc.total,
       });
     });
   } catch (e) {
@@ -112,10 +112,10 @@ exports.myHistory = async (req, res, next) => {
         return next(err);
       }
       res.status(200).json({
-        data: doc.docs.docs,
+        data: doc.docs,
         limit: limit,
         skip: page,
-        total: doc.docs.total,
+        total: doc.total,
       });
     });
   } catch (e) {
@@ -152,10 +152,10 @@ exports.myBooking = async function myBookings(req, res, next) {
         return next(err);
       }
       res.status(200).json({
-        data: doc.docs.docs,
+        data: doc.docs,
         limit: limit,
         skip: page,
-        total: doc.docs.total,
+        total: doc.total,
       });
     });
   } catch (e) {
@@ -280,10 +280,10 @@ exports.sortOut = (req, res, next) => {
         return next(err);
       }
       res.status(200).json({
-        data: doc.docs.docs,
+        data: doc.docs,
         limit: limit,
         skip: page,
-        total: doc.docs.total,
+        total: doc.total,
       });
     });
   } catch (e) {
@@ -347,7 +347,7 @@ exports.requestBooking = async (req, res, next) => {
       checkOut: new Date(checkOut),
       tx_ref:
         req.body.currency_type === "ETB"
-          ? `gojo-booking-${uuidv4()}`
+          ? `triplaye-booking-${uuidv4()}`
           : `international-booking-${uuidv4()}`,
       guests,
       withBreakFast: req.body.withBreakFast,
@@ -502,7 +502,7 @@ exports.requestBookingWallet = async (req, res, next) => {
 
       tx_ref:
         req.body.currency_type === "ETB"
-          ? `gojo-booking-${uuidv4()}`
+          ? `triplay-booking-${uuidv4()}`
           : `international-booking-${uuidv4()}`,
       guests,
       created_by: {
@@ -553,7 +553,7 @@ exports.requestBookingWallet = async (req, res, next) => {
     let message = {
       notification: {
         title: "New Booking Request",
-        body: `A new booking request has been made for ${accomInfo.name}.\n\n Please log into your Gojo account to view and manage the booking details.`,
+        body: `A new booking request has been made for ${accomInfo.name}.\n\n Please log into your Triplaye account to view and manage the booking details.`,
       },
     };
 

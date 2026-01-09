@@ -52,10 +52,10 @@ exports.fetchAll = async function fetchAll(req, res, next) {
         return next(err);
       }
       res.status(200).json({
-        data: doc.docs.docs,
+        data: doc.docs,
         limit: limit,
         skip: page,
-        total: doc.docs.total,
+        total: doc.total,
       });
     });
   } catch (e) {
@@ -87,10 +87,10 @@ exports.viewAll = async (req, res, next) => {
           return next(err);
         }
         res.status(200).json({
-          data: doc.docs.docs,
+          data: doc.docs,
           limit: limit,
           skip: page,
-          total: doc.docs.total,
+          total: doc.total,
         });
       }
     );
@@ -219,10 +219,10 @@ exports.filterbyCategory = (req, res, next) => {
         return next(err);
       }
       res.status(200).json({
-        data: doc.docs.docs,
+        data: doc.docs,
         limit: limit,
         skip: page,
-        total: doc.docs.total,
+        total: doc.total,
       });
     });
   } catch (e) {

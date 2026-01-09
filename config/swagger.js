@@ -19,7 +19,7 @@ const swaggerOptions = {
                     Authentication is handled using Bearer tokens (JWT).
 
                     This documentation is intended for frontend developers, mobile developers,
-                    and third-party integrators who want to build on top of the GOJO Booking platform.`,
+                    and third-party integrators who want to build on top of the Triplaye platform.`,
     },
     servers: [
       {url: "https://138.199.225.171/backend/v1/api"},

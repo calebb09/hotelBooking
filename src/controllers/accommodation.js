@@ -82,7 +82,7 @@ exports.fetchAll = async function fetchAll(req, res, next) {
         data: _.shuffle(doc.docs),
         limit: limit,
         skip: page,
-        total: doc.docs.total,
+        total: doc.total,
       });
     });
   } catch (e) {
