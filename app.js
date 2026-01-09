@@ -15,7 +15,7 @@ const swaggerJSDOC = require("swagger-jsdoc");
 const {startCronJobs} = require("./src/jobs/");
 const fireadmin = require("firebase-admin");
 const serviceAccount = require(`./config/firebase/${config.SERVICE_ACCT}`);
-
+const cors = require("cors");
 // Firebase
 fireadmin.initializeApp({
   credential: fireadmin.credential.cert(serviceAccount),
@@ -28,6 +28,11 @@ connectDB();
 const app = express();
 app.disable("x-powered-by");
 app.set("port", config.PORT);
+
+// =======================
+// ENABLE CORS
+// =======================
+app.use(cors(config.CORS_OPTS));
 
 // Middlewares
 app.use(morgan("dev"));
