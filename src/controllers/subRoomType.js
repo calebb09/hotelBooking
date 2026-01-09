@@ -372,7 +372,7 @@ function removePicture(room, picUrl, callback) {
 function calculateRoomRateAverage(req, res, next) {
   subRoomTypeDal.getCollection({}, {}, (err, eedoc) => {
     if (err) {
-      return next(err);
+      console.error(err);
     }
     eedoc.forEach(async (item) => {
       if (item.rates.length > 0) {
