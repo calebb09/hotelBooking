@@ -119,10 +119,10 @@ exports.sortyBy = async function (req, res) {
             return next(err);
           }
           res.status(200).json({
-            data: doc.docs.docs,
+            data: doc.docs,
             limit: limit,
             skip: page,
-            total: doc.docs.total,
+            total: doc.total,
           });
         }
       );
@@ -151,10 +151,10 @@ exports.fetchunOwned = async (req, res, next) => {
         return next(err);
       }
       res.status(200).json({
-        data: _.shuffle(doc.docs.docs),
+        data: _.shuffle(doc.docs),
         limit: limit,
         skip: page,
-        total: doc.docs.total,
+        total: doc.total,
       });
     });
   } catch (e) {
@@ -252,10 +252,10 @@ exports.all = async function fetchAll(req, res, next) {
         return next(err);
       }
       res.status(200).json({
-        data: doc.docs.docs,
+        data: doc.docs,
         limit: limit,
         skip: page,
-        total: doc.docs.total,
+        total: doc.total,
       });
     });
   } catch (e) {
@@ -298,10 +298,10 @@ exports.TopUnique = (req, res, next) => {
         return next(err);
       }
       res.status(200).json({
-        data: doc.docs.docs,
+        data: doc.docs,
         limit: limit,
         skip: page,
-        total: doc.docs.total,
+        total: doc.total,
       });
     });
   } catch (e) {
@@ -330,7 +330,7 @@ exports.trending = (req, res, next) => {
         }
         // ✅ Use Promise.all with map to get counts
         const accommodationsWithCounts = await Promise.all(
-          doc.docs.docs.map(async (accommodation) => {
+          doc.docs.map(async (accommodation) => {
             const bookingCount = await BookMdl.countDocuments({
               accommodation: accommodation._id,
               status: "completed",
@@ -353,7 +353,7 @@ exports.trending = (req, res, next) => {
           data: filtered.length > 4 ? filtered : [],
           limit: limit,
           skip: page,
-          total: doc.docs.total,
+          total: doc.total,
         });
       }
     );
@@ -826,10 +826,10 @@ exports.filter = async (req, res, next) => {
       return next(err);
     }
     res.status(200).json({
-      data: doc.docs.docs,
+      data: doc.docs,
       limit: limit,
       skip: page,
-      total: doc.docs.total,
+      total: doc.total,
     });
   });
 };
@@ -1122,7 +1122,7 @@ exports.reviewAccommodation = async (req, res, next) => {
         body:
           "Dear " +
           req.doc.created_by.internal.first_name +
-          "! The licence you uploaded is not accepted by GojoBooking. Therefore we have rejected your and restricted to further progress",
+          "! The licence you uploaded is not accepted by Triplaye. Therefore we have rejected your and restricted to further progress",
       },
     };
   }
