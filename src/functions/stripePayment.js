@@ -333,7 +333,7 @@ async function checkPending(req, res, next) {
   const data = await BalanceDal.find({status: "pending", currency_type: "USD"});
   if (data.length > 0) {
     for (const item of data) {
-      if (item.transaction.wallet_recharge.stripeId) {
+      if (item?.transaction?.wallet_recharge?.stripeId) {
         await Stripe.charges
           .retrieve(item.transaction.wallet_recharge.stripeId)
           .then(async (stripe_data) => {
