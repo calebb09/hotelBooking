@@ -921,12 +921,11 @@ exports.searchNewRooms = async (req, res) => {
         .filter((g) => g.subRoomType.number_of_guests >= totalGuests)
         .map((g) => ({
           type: "single",
-          subRoomTypes: [
-            {
-              subRoomType: g.subRoomType,
-              usedRooms: 1,
-            },
-          ],
+          subRoomTypes: {
+            // Changed: Object instead of array for single
+            subRoomType: g.subRoomType,
+            usedRooms: 1,
+          },
           availableRooms: g.availableRooms,
           totalCapacity: g.subRoomType.number_of_guests,
           totalPrice: g.subRoomType.price_info?.room_price || 0,
@@ -943,9 +942,11 @@ exports.searchNewRooms = async (req, res) => {
       const combinationOptions = combinations.map((combo) => ({
         type: "combination",
         subRoomTypes: combo.map((c) => ({
+          // Keep as array for combination
           subRoomType: c.subRoomType,
           usedRooms: 1,
         })),
+        availableRooms: Math.min(...combo.map((c) => c.availableRooms)), // Added: Min available across combo
         totalCapacity: combo.reduce(
           (sum, c) => sum + c.subRoomType.number_of_guests,
           0
