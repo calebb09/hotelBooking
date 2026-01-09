@@ -800,7 +800,7 @@ exports.searchNewRooms = async (req, res) => {
     }
 
     // ===================================================
-    // 2. SUBROOMTYPE COMBINATIONS (🔥 CORE LOGIC)
+    // 2. SUBROOMTYPE COMBINATIONS (CORE LOGIC)
     // ===================================================
     function getSubRoomTypeCombinations(
       subRoomGroups,
@@ -847,10 +847,9 @@ exports.searchNewRooms = async (req, res) => {
       totalGuests
     ) {
       // -----------------------------------------------
-      // Fetch all available rooms
+      // Fetch rooms
       // -----------------------------------------------
       const rooms = await RoomMdl.find({
-        // status: "available",
         is_hidden: false,
       }).populate({
         path: "subRoomType",
@@ -876,7 +875,7 @@ exports.searchNewRooms = async (req, res) => {
       );
 
       // -----------------------------------------------
-      // Filter overlapping bookings
+      // Remove overlapping bookings
       // -----------------------------------------------
       const availableRooms = [];
 
@@ -891,7 +890,7 @@ exports.searchNewRooms = async (req, res) => {
       }
 
       // -----------------------------------------------
-      // GROUP ROOMS BY SUBROOMTYPE
+      // Group by subRoomType
       // -----------------------------------------------
       const groupedBySubRoomType = {};
 
@@ -915,16 +914,16 @@ exports.searchNewRooms = async (req, res) => {
       }));
 
       // -----------------------------------------------
-      // SINGLE SUBROOMTYPE OPTIONS
+      // SINGLE OPTIONS
       // -----------------------------------------------
       const singleOptions = subRoomGroups
         .filter((g) => g.subRoomType.number_of_guests >= totalGuests)
         .map((g) => ({
           type: "single",
           subRoomTypes: {
-            // Changed: Object instead of array for single
             subRoomType: g.subRoomType,
             usedRooms: 1,
+            rooms: g.rooms, // 👈 ACTUAL ROOMS
           },
           availableRooms: g.availableRooms,
           totalCapacity: g.subRoomType.number_of_guests,
@@ -942,11 +941,11 @@ exports.searchNewRooms = async (req, res) => {
       const combinationOptions = combinations.map((combo) => ({
         type: "combination",
         subRoomTypes: combo.map((c) => ({
-          // Keep as array for combination
           subRoomType: c.subRoomType,
           usedRooms: 1,
+          rooms: c.rooms, // 👈 ACTUAL ROOMS
         })),
-        availableRooms: Math.min(...combo.map((c) => c.availableRooms)), // Added: Min available across combo
+        availableRooms: Math.min(...combo.map((c) => c.availableRooms)),
         totalCapacity: combo.reduce(
           (sum, c) => sum + c.subRoomType.number_of_guests,
           0
@@ -957,14 +956,11 @@ exports.searchNewRooms = async (req, res) => {
         ),
       }));
 
-      // -----------------------------------------------
-      // FINAL RETURN
-      // -----------------------------------------------
       return [...singleOptions, ...combinationOptions];
     }
 
     // ===================================================
-    // 4. CONTROLLER
+    // 4. CONTROLLER EXECUTION
     // ===================================================
     const {accommodation, checkIn, checkOut, guests} = req.body;
 
@@ -977,10 +973,10 @@ exports.searchNewRooms = async (req, res) => {
     const checkOutDate = new Date(checkOut);
 
     // Pagination
-    let page = parseInt(req.query.page) || 1;
-    let limit = parseInt(req.query.limit) || 20;
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(parseInt(req.query.limit) || 20, 100);
+    const start = (page - 1) * limit;
 
-    // Fetch result
     const results = await findAvailableRooms(
       accommodation,
       checkInDate,
@@ -988,23 +984,18 @@ exports.searchNewRooms = async (req, res) => {
       totalGuests
     );
 
-    // Pagination logic
-    const total = results.length;
-    const start = (page - 1) * limit;
-    const end = start + limit;
-
-    // Response
     res.json({
-      data: results.slice(start, end),
+      data: results.slice(start, start + limit),
       page,
       limit,
-      total,
+      total: results.length,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({msg: "Internal Server Error", error});
   }
 };
+
 exports.searchBooking = async (req, res, next) => {
   try {
     const {
