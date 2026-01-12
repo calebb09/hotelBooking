@@ -1016,38 +1016,37 @@ exports.uploadHouseRUle = (req, res, next) => {
 };
 exports.uploadPicture = (req, res, next) => {
   if (!req.files[0]) {
-    res.status(400).json({
+    return res.status(400).json({
       msg: "file not passed",
       status: 400,
     });
   }
   if (req.files.length === 0) {
-    res.status(400).json({
+    return res.status(400).json({
       msg: "file not passed",
       status: 400,
     });
-  } else {
-    async.eachSeries(
-      req.files,
-      function (data, callback) {
-        AccommodationDal.update(
-          {_id: req.doc._id},
-          {$push: {picture: data.filename}},
-          (err, image_doc) => {
-            if (err) return next(err);
-          }
-        );
-        callback(null);
-      },
-      function done(err) {
-        if (err) {
-          return next(err);
-        } else {
-          res.status(200).json({msg: "successfully updated", status: 200});
-        }
-      }
-    );
   }
+  async.eachSeries(
+    req.files,
+    function (data, callback) {
+      AccommodationDal.update(
+        {_id: req.doc._id},
+        {$push: {picture: data.filename}},
+        (err, image_doc) => {
+          if (err) return next(err);
+        }
+      );
+      callback(null);
+    },
+    function done(err) {
+      if (err) {
+        return next(err);
+      } else {
+        return res.status(200).json({msg: "successfully updated", status: 200});
+      }
+    }
+  );
 };
 exports.removePicture = (req, res, next) => {
   console.log(req.query.picture);
