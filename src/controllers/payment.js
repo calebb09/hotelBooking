@@ -726,13 +726,13 @@ exports.walletPay = async (req, res, next) => {
 };
 exports.rechargeWallet = async (req, res, next) => {
   let user_email = "";
-  req.checkBody("stripeToken").notEmpty().withMessage("Stripe Token is a must");
-  req
-    .checkBody("payment_amount")
-    .notEmpty()
-    .withMessage("payment_amount is a must")
-    .isNumeric()
-    .withMessage("Only number allowed");
+  // req.checkBody("stripeToken").notEmpty().withMessage("Stripe Token is a must");
+  // req
+  //   .checkBody("payment_amount")
+  //   .notEmpty()
+  //   .withMessage("payment_amount is a must")
+  //   .isNumeric()
+  //   .withMessage("Only number allowed");
   var amount = Math.round(req.body.payment_amount * 100);
   await Client.findOne({uuid: req.user.uuid})
     .then(async (data) => {
@@ -740,18 +740,18 @@ exports.rechargeWallet = async (req, res, next) => {
         res.status(400).json({msg: "user not found", status: 404});
       } else {
         if (data.email === null) {
-          req
-            .check("email")
-            .notEmpty()
-            .withMessage("Email is required")
-            .isEmail()
-            .withMessage("Should be valid email");
-          var validationErrors = req.validationErrors();
-          if (validationErrors) {
-            res.status(400);
-            res.json(validationErrors);
-            return;
-          }
+          // req
+          //   .check("email")
+          //   .notEmpty()
+          //   .withMessage("Email is required")
+          //   .isEmail()
+          //   .withMessage("Should be valid email");
+          // var validationErrors = req.validationErrors();
+          // if (validationErrors) {
+          //   res.status(400);
+          //   res.json(validationErrors);
+          //   return;
+          // }
           user_email = req.body.email;
         } else {
           user_email = data.email;
@@ -797,13 +797,13 @@ exports.rechargeWallet = async (req, res, next) => {
     });
 };
 exports.clientChargeWallet = async (req, res, next) => {
-  req.checkBody("stripeToken").notEmpty().withMessage("Token is empty");
-  var validationErrors = req.validationErrors();
-  if (validationErrors) {
-    res.status(400);
-    res.json(validationErrors);
-    return;
-  }
+  // req.checkBody("stripeToken").notEmpty().withMessage("Token is empty");
+  // var validationErrors = req.validationErrors();
+  // if (validationErrors) {
+  //   res.status(400);
+  //   res.json(validationErrors);
+  //   return;
+  // }
   var amount = Math.round(req.body.payment_amount * 100);
   req._user.role === "owner"
     ? await StripePayment.directPay(

@@ -256,15 +256,15 @@ exports.fetchOneAdmin = (req, res, next) => {
 };
 exports.create = async function create(req, res, next) {
   var body = req.body;
-  req.checkBody("title").notEmpty().withMessage("Please enter the title");
-  req.checkBody("message").notEmpty().withMessage("Please enter the message");
-  //training_date
-  var validationErrors = req.validationErrors();
-  if (validationErrors) {
-    res.status(400);
-    res.json(validationErrors);
-    return;
-  }
+  // req.checkBody("title").notEmpty().withMessage("Please enter the title");
+  // req.checkBody("message").notEmpty().withMessage("Please enter the message");
+  // //training_date
+  // var validationErrors = req.validationErrors();
+  // if (validationErrors) {
+  //   res.status(400);
+  //   res.json(validationErrors);
+  //   return;
+  // }
   body.created_at = now;
   body.created_by = req._user._id;
   let mailOptions = {};

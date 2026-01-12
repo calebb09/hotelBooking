@@ -167,17 +167,17 @@ exports.fetchOne = function fetchOne(req, res, next) {
 };
 exports.bookingManually = async function manualCreateBooking(req, res, next) {
   var body = req.body;
-  req.checkBody("name").notEmpty().withMessage("Name is required");
+  // req.checkBody("name").notEmpty().withMessage("Name is required");
 
-  req.checkBody("checkIn").notEmpty().withMessage("CheckIn is required");
-  req.checkBody("checkOut").notEmpty().withMessage("Checkout is required");
-  req.checkBody("room").notEmpty().withMessage("Room is required");
-  var validationErrors = req.validationErrors();
-  if (validationErrors) {
-    res.status(400);
-    res.json(validationErrors);
-    return;
-  }
+  // req.checkBody("checkIn").notEmpty().withMessage("CheckIn is required");
+  // req.checkBody("checkOut").notEmpty().withMessage("Checkout is required");
+  // req.checkBody("room").notEmpty().withMessage("Room is required");
+  // var validationErrors = req.validationErrors();
+  // if (validationErrors) {
+  //   res.status(400);
+  //   res.json(validationErrors);
+  //   return;
+  // }
   if (body.room.length > 0) {
     await Accommodation.find({
       $and: [

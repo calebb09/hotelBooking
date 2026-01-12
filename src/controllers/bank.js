@@ -168,21 +168,21 @@ exports.createBanks = (req, res, next) => {
 exports.withdrawMoney = async (req, res) => {
   /** first check if the balance is available from the client side */
   try {
-    req
-      .checkBody("sourceAmount")
-      .notEmpty()
-      .withMessage("Amount should not be empty")
-      .len(2, 3)
-      .withMessage("2 to 3 digit")
-      .isNumeric()
-      .withMessage("Only number allowed");
-    req.checkBody("bankId").notEmpty().withMessage("Bank should not be empty");
-    var validationErrors = req.validationErrors();
-    if (validationErrors) {
-      res.status(400);
-      res.json(validationErrors);
-      return;
-    }
+    // req
+    //   .checkBody("sourceAmount")
+    //   .notEmpty()
+    //   .withMessage("Amount should not be empty")
+    //   .len(2, 3)
+    //   .withMessage("2 to 3 digit")
+    //   .isNumeric()
+    //   .withMessage("Only number allowed");
+    // req.checkBody("bankId").notEmpty().withMessage("Bank should not be empty");
+    // var validationErrors = req.validationErrors();
+    // if (validationErrors) {
+    //   res.status(400);
+    //   res.json(validationErrors);
+    //   return;
+    // }
     await Wallet.findOne({
       $and: [
         {"user_information.user_type": "client"},
@@ -321,21 +321,21 @@ exports.withdrawMoney = async (req, res) => {
 exports.withDrawNow = async (req, res) => {
   /** first check if the balance is available from the client side */
   try {
-    req
-      .checkBody("sourceAmount")
-      .notEmpty()
-      .withMessage("Amount should not be empty")
-      .len(2, 3)
-      .withMessage("2 to 3 digit")
-      .isNumeric()
-      .withMessage("Only number allowed");
-    req.checkBody("bankId").notEmpty().withMessage("Bank should not be empty");
-    var validationErrors = req.validationErrors();
-    if (validationErrors) {
-      res.status(400);
-      res.json(validationErrors);
-      return;
-    }
+    // req
+    //   .checkBody("sourceAmount")
+    //   .notEmpty()
+    //   .withMessage("Amount should not be empty")
+    //   .len(2, 3)
+    //   .withMessage("2 to 3 digit")
+    //   .isNumeric()
+    //   .withMessage("Only number allowed");
+    // req.checkBody("bankId").notEmpty().withMessage("Bank should not be empty");
+    // var validationErrors = req.validationErrors();
+    // if (validationErrors) {
+    //   res.status(400);
+    //   res.json(validationErrors);
+    //   return;
+    // }
     const customerInfo = await Client.findOne({uuid: req.user.uuid});
 
     if (customerInfo) {

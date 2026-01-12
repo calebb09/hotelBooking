@@ -62,13 +62,13 @@ exports.fetchOne = function fetchOne(req, res) {
 
 exports.create = (req, res, next) => {
   var body = req.body;
-  req.checkBody("name").notEmpty().withMessage("Name is required");
-  var validationErrors = req.validationErrors();
-  if (validationErrors) {
-    res.status(400);
-    res.json(validationErrors);
-    return;
-  }
+  // req.checkBody("name").notEmpty().withMessage("Name is required");
+  // var validationErrors = req.validationErrors();
+  // if (validationErrors) {
+  //   res.status(400);
+  //   res.json(validationErrors);
+  //   return;
+  // }
   let query = {
     name: req.body.name,
   };

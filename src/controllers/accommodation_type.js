@@ -84,14 +84,6 @@ exports.fetchOne = function fetchOne(req, res) {
   res.json(req.doc);
 };
 exports.create = (req, res, next) => {
-  req.checkBody("name").notEmpty().withMessage("Name is required");
-  req.checkBody("icon").notEmpty().withMessage("Icon is required");
-  var validationErrors = req.validationErrors();
-  if (validationErrors) {
-    res.status(400);
-    res.json(validationErrors);
-    return;
-  }
   let body = req.body;
   let query = {
     name: body.name,

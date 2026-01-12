@@ -185,40 +185,40 @@ exports.resetPass = function resetPass(req, res, next) {
 };
 exports.createAdmin = function createAdmin(req, res, next) {
   var body = req.body;
-  req
-    .checkBody("username", "Username  should not be empty!")
-    .isEmail()
-    .withMessage("Username should be email")
-    .notEmpty()
-    .withMessage("Username should not be empty");
-  req
-    .checkBody("phone", "Phone  should not be empty!")
-    .notEmpty()
-    .withMessage("Phone number is requied");
-  req
-    .checkBody("password")
-    .notEmpty()
-    .withMessage("password should not be empty")
-    .len(6, 20)
-    .withMessage("6 to 20 characters required");
-  req
-    .checkBody("role", "Role Type is Invalid!")
-    .notEmpty()
-    .withMessage("Role Type should not be Empty")
-    .isIn(["sales", "owner", "receptionist", "call_center"])
-    .withMessage("Unknown User Type Detected!");
-  if (body.role === "owner") {
-    req
-      .checkBody("assigned_accommodation", "Assign Accommodation!")
-      .notEmpty()
-      .withMessage("Accommodation should not be Empty");
-  }
-  var validationErrors = req.validationErrors();
-  if (validationErrors) {
-    res.status(400);
-    res.json(validationErrors);
-    return;
-  }
+  // req
+  //   .checkBody("username", "Username  should not be empty!")
+  //   .isEmail()
+  //   .withMessage("Username should be email")
+  //   .notEmpty()
+  //   .withMessage("Username should not be empty");
+  // req
+  //   .checkBody("phone", "Phone  should not be empty!")
+  //   .notEmpty()
+  //   .withMessage("Phone number is requied");
+  // req
+  //   .checkBody("password")
+  //   .notEmpty()
+  //   .withMessage("password should not be empty")
+  //   .len(6, 20)
+  //   .withMessage("6 to 20 characters required");
+  // req
+  //   .checkBody("role", "Role Type is Invalid!")
+  //   .notEmpty()
+  //   .withMessage("Role Type should not be Empty")
+  //   .isIn(["sales", "owner", "receptionist", "call_center"])
+  //   .withMessage("Unknown User Type Detected!");
+  // if (body.role === "owner") {
+  //   req
+  //     .checkBody("assigned_accommodation", "Assign Accommodation!")
+  //     .notEmpty()
+  //     .withMessage("Accommodation should not be Empty");
+  // }
+  // var validationErrors = req.validationErrors();
+  // if (validationErrors) {
+  //   res.status(400);
+  //   res.json(validationErrors);
+  //   return;
+  // }
   var username = body.username;
   // Query DB for a user with the given ID
   UserDal.get(
@@ -286,13 +286,13 @@ exports.createAdmin = function createAdmin(req, res, next) {
 exports.register = function register(req, res, next) {
   var body = req.body;
   console.log(body.email);
-  req
-    .checkBody("email")
-    .notEmpty()
-    .withMessage("Email should not be Empty")
-    .isEmail()
-    .withMessage("Should be valid email");
-  req.checkBody("phone").notEmpty().withMessage("Phone number is required");
+  // req
+  //   .checkBody("email")
+  //   .notEmpty()
+  //   .withMessage("Email should not be Empty")
+  //   .isEmail()
+  //   .withMessage("Should be valid email");
+  // req.checkBody("phone").notEmpty().withMessage("Phone number is required");
   crypto.randomBytes(16, async function genToken(err, buff) {
     if (err) {
       return next(err);
@@ -378,113 +378,65 @@ exports.register = function register(req, res, next) {
   });
 };
 exports.signup = function signup(req, res, next) {
-  var workflow = new events.EventEmitter();
-  var body = req.body;
-  workflow.on("validateUser", function validateUser() {
-    req
-      .checkBody("username", "Username  should not be empty!")
-      .isEmail()
-      .withMessage("Username should be email")
-      .notEmpty();
-
-    req
-      .checkBody("password")
-      .notEmpty()
-      .withMessage("password should not be empty")
-      .len(6, 20)
-      .withMessage("6 to 20 characters required");
-    req
-      .checkBody("user_type", "User Type is Invalid!")
-      .notEmpty()
-      .withMessage("User Type should not be Empty")
-      .isIn(["super_admin"])
-      .withMessage("Invalid User type");
-    var validationErrors = req.validationErrors();
-    if (validationErrors) {
-      res.status(400);
-      res.json(validationErrors);
-    } else {
-      workflow.emit("checkUserExist");
-    }
-  });
   /**
    * Check for user exist or not
    */
-  workflow.on("checkUserExist", function checkUserExist() {
-    debug("checkUserExist");
-    // Query DB for a user with the given ID
-    UserDal.get(
-      {
-        role: "super_admin",
-      },
-      function cb(err, user) {
-        if (err) {
-          return next(err);
-        }
-        // If user find return it
-        if (user._id) {
-          res.status(400);
-          res.json({
-            error: true,
-            msg: "User already exists",
-            status: 400,
-          });
-        } //automated crawler blocking
-        else {
-          workflow.emit("createUser");
-        }
+
+  UserDal.get(
+    {
+      role: "super_admin",
+    },
+    function cb(err, user) {
+      if (err) {
+        return next(err);
       }
-    );
-  });
-  workflow.on("createUser", function createUser() {
-    debug("Creating user");
-    // Create User
-    UserDal.create(
-      {
-        password: body.password,
-        username: body.username,
-        role: body.user_type,
-      },
-      function callback(err, user) {
-        if (err) {
-          return next(err);
-        }
-        workflow.emit("createUserType", user);
-      }
-    );
-  });
-  workflow.on("createUserType", function respond(user) {
-    if (body.user_type === "super_admin") {
-      body.user = user._id;
-      body.role = body.role;
-      InternalDal.create(body, function createInternal(err, doc) {
-        if (err) {
-          return next(err);
-        }
-        UserDal.update(
+      // If user find return it
+      if (user._id) {
+        res.status(400);
+        return res.json({
+          error: true,
+          msg: "User already exists",
+          status: 400,
+        });
+      } //automated crawler blocking
+      else {
+        // Create User
+        UserDal.create(
           {
-            _id: user._id,
+            password: body.password,
+            username: body.username,
+            role: body.user_type,
           },
-          {
-            internal: doc._id,
-            realm: "internal",
-            account_status: "active",
-          },
-          function updateUser(err, udoc) {
+          function callback(err, user) {
             if (err) {
               return next(err);
             }
-            workflow.emit("respond", udoc, doc);
+            InternalDal.create(body, function createInternal(err, doc) {
+              if (err) {
+                return next(err);
+              }
+              UserDal.update(
+                {
+                  _id: user._id,
+                },
+                {
+                  internal: doc._id,
+                  realm: "internal",
+                  account_status: "active",
+                },
+                function updateUser(err, udoc) {
+                  if (err) {
+                    return next(err);
+                  }
+                  workflow.emit("respond", udoc, doc);
+                }
+              );
+            });
           }
         );
-      });
+      }
     }
-  });
-  workflow.on("respond", function respond(user, doc) {
-    res.status(201);
-    res.json(user);
-  });
-  workflow.emit("validateUser");
+  );
 };
 exports.checkPhone = function checkPhone(req, res, next) {
   let query = {
@@ -564,12 +516,12 @@ exports.forgotPassword = function forgotPassword(req, res, next) {
   var body = req.body;
   var reset_link_address = "https://gojo.com";
 
-  req
-    .checkBody("username")
-    .notEmpty()
-    .withMessage("Email should not be Empty")
-    .isEmail()
-    .withMessage("Should be valid email");
+  // req
+  //   .checkBody("username")
+  //   .notEmpty()
+  //   .withMessage("Email should not be Empty")
+  //   .isEmail()
+  //   .withMessage("Should be valid email");
   UserDal.get(
     {
       username: body.username,
@@ -651,30 +603,30 @@ exports.changeRole = function changeRole(req, res, next) {
   );
 };
 exports.activateAccount = function activateAccount(req, res, next) {
-  req
-    .checkBody("email", "email  should not be empty!")
-    .isEmail()
-    .withMessage("must be a valid email address")
-    .notEmpty()
-    .withMessage("Email should not be empty");
-  req
-    .checkBody("account_status", "Account status is Invalid!")
-    .notEmpty()
-    .withMessage("Account Status should not be Empty")
-    .isIn(["active", "rejected"])
-    .withMessage("Unknown string passed");
-  if (req.body.account_status === "rejected") {
-    req
-      .checkBody("reason", "reason should not be empty")
-      .notEmpty()
-      .withMessage("reason Status should not be Empty");
-  }
-  var validationErrors = req.validationErrors();
-  if (validationErrors) {
-    res.status(400);
-    res.json(validationErrors);
-    return;
-  }
+  // req
+  //   .checkBody("email", "email  should not be empty!")
+  //   .isEmail()
+  //   .withMessage("must be a valid email address")
+  //   .notEmpty()
+  //   .withMessage("Email should not be empty");
+  // req
+  //   .checkBody("account_status", "Account status is Invalid!")
+  //   .notEmpty()
+  //   .withMessage("Account Status should not be Empty")
+  //   .isIn(["active", "rejected"])
+  //   .withMessage("Unknown string passed");
+  // if (req.body.account_status === "rejected") {
+  //   req
+  //     .checkBody("reason", "reason should not be empty")
+  //     .notEmpty()
+  //     .withMessage("reason Status should not be Empty");
+  // }
+  // var validationErrors = req.validationErrors();
+  // if (validationErrors) {
+  //   res.status(400);
+  //   res.json(validationErrors);
+  //   return;
+  // }
   UserDal.get(
     {
       username: req.body.email,
@@ -741,22 +693,22 @@ exports.activateAccount = function activateAccount(req, res, next) {
 };
 exports.passwordChange = function passwordChange(req, res, next) {
   var body = req.body;
-  req
-    .checkBody("new_password")
-    .notEmpty()
-    .withMessage("Password should not be Empty")
-    .len(6, 20)
-    .withMessage("6 to 20 characters required")
-    .matches(/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/)
-    .withMessage(
-      "Password must contain at least one uppercase letter, one number, and one special character (!@#$%^&*)"
-    );
-  req
-    .checkBody("confirm_password")
-    .notEmpty()
-    .withMessage("Confirm Password should not be Empty")
-    .len(6, 20)
-    .withMessage("6 to 20 characters required");
+  // req
+  //   .checkBody("new_password")
+  //   .notEmpty()
+  //   .withMessage("Password should not be Empty")
+  //   .len(6, 20)
+  //   .withMessage("6 to 20 characters required")
+  //   .matches(/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/)
+  //   .withMessage(
+  //     "Password must contain at least one uppercase letter, one number, and one special character (!@#$%^&*)"
+  //   );
+  // req
+  //   .checkBody("confirm_password")
+  //   .notEmpty()
+  //   .withMessage("Confirm Password should not be Empty")
+  //   .len(6, 20)
+  //   .withMessage("6 to 20 characters required");
 
   UserDal.getCollection(
     {

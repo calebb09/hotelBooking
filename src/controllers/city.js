@@ -92,14 +92,7 @@ exports.fetchOne = function fetchOne(req, res) {
 
 exports.create = (req, res, next) => {
   var body = req.body;
-  req.checkBody("name").notEmpty().withMessage("FCM token is required");
-  req.checkBody("picture").notEmpty().withMessage("City ID is required");
-  var validationErrors = req.validationErrors();
-  if (validationErrors) {
-    res.status(400);
-    res.json(validationErrors);
-    return;
-  }
+
   let query = {name: req.body.name};
 
   CityDal.get(query, (err, cat) => {

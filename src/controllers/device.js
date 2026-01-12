@@ -63,14 +63,14 @@ exports.fetchOne = function fetchOne(req, res) {
 };
 
 exports.create = (req, res, next) => {
-  req.checkBody("fcm_token").notEmpty().withMessage("FCM token is required");
-  req.checkBody("device_id").notEmpty().withMessage("Device ID is required");
-  var validationErrors = req.validationErrors();
-  if (validationErrors) {
-    res.status(400);
-    res.json(validationErrors);
-    return;
-  }
+  // req.checkBody("fcm_token").notEmpty().withMessage("FCM token is required");
+  // req.checkBody("device_id").notEmpty().withMessage("Device ID is required");
+  // var validationErrors = req.validationErrors();
+  // if (validationErrors) {
+  //   res.status(400);
+  //   res.json(validationErrors);
+  //   return;
+  // }
   let query = {
     $and: [
       {

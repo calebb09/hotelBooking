@@ -82,16 +82,16 @@ exports.fetchOne = function fetchOne(req, res, next) {
 };
 exports.create = function create(req, res, next) {
   var body = req.body;
-  req
-    .checkBody("name")
-    .notEmpty()
-    .withMessage("Category name should not be empty");
-  var validationErrors = req.validationErrors();
-  if (validationErrors) {
-    res.status(400);
-    res.json(validationErrors);
-    return;
-  }
+  // req
+  //   .checkBody("name")
+  //   .notEmpty()
+  //   .withMessage("Category name should not be empty");
+  // var validationErrors = req.validationErrors();
+  // if (validationErrors) {
+  //   res.status(400);
+  //   res.json(validationErrors);
+  //   return;
+  // }
   body.created_by = req._user._id;
 
   RoomTypeDal.get(
