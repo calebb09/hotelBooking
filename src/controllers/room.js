@@ -115,86 +115,59 @@ exports.create = (req, res, next) => {
     //   return;
     // }
 
-    RoomDal.getCollection(
+    AccommodationDal.get(
       {
-        $and: [
-          {
-            room_number: body.room_number,
-          },
-          {
-            accommodation: req._user.assigned_accommodation,
-          },
-        ],
+        $and: [{_id: req._user.assigned_accommodation}, {is_verified: true}],
       },
-      {},
-      (err, room_doc) => {
+      (err, hotel_document) => {
         if (err) {
           return next(err);
         }
-        room_doc.length > 0
+        hotel_document === null
           ? res.status(400).json({
-              msg: "data already exists",
-              status: 400,
+              msg: "your accommodation is not verified by Triplaye",
             })
-          : AccommodationDal.get(
-              {
-                $and: [
-                  {_id: req._user.assigned_accommodation},
-                  {is_verified: true},
-                ],
-              },
-              (err, hotel_document) => {
-                if (err) {
-                  return next(err);
-                }
-                hotel_document === null
-                  ? res.status(400).json({
-                      msg: "your accommodation is not verified by Triplaye",
-                    })
-                  : Object.keys(hotel_document).length === 0
-                  ? res.status(400).json({
-                      msg: "Your accommodation is not found or verified",
-                    })
-                  : RoomDal.create(body, (err, room_document) => {
-                      if (err) {
-                        return next(err);
-                      }
-                      AccommodationDal.update(
-                        {_id: req._user.assigned_accommodation},
-                        {$push: {room: room_document.id}},
-                        async (err, updateAccommodation) => {
-                          if (err) {
-                            return next(err);
-                          }
-                          // pushit to subroomtype
-                          const updatesubRoomType =
-                            await subRoomType.findOneAndUpdate(
-                              body.subRoomType,
-                              {
-                                $push: {rooms: room_document._id},
-                              },
-                              {
-                                new: true,
-                              }
-                            );
-                          if (updatesubRoomType) {
-                            res.status(200).json({
-                              msg: "created successfully",
-                              status: 200,
-                            });
-                            return;
-                          } else {
-                            res.status(400).json({
-                              msg: "Room was not pushed to subRoomType",
-                              status: 400,
-                            });
-                            return;
-                          }
-                        }
-                      );
-                    });
+          : Object.keys(hotel_document).length === 0
+          ? res.status(400).json({
+              msg: "Your accommodation is not found or verified",
+            })
+          : RoomDal.create(body, (err, room_document) => {
+              if (err) {
+                return next(err);
               }
-            );
+              AccommodationDal.update(
+                {_id: req._user.assigned_accommodation},
+                {$push: {room: room_document.id}},
+                async (err, updateAccommodation) => {
+                  if (err) {
+                    return next(err);
+                  }
+                  // pushit to subroomtype
+                  const updatesubRoomType = await subRoomType.findOneAndUpdate(
+                    body.subRoomType,
+                    {
+                      $push: {rooms: room_document._id},
+                    },
+                    {
+                      new: true,
+                    }
+                  );
+                  if (updatesubRoomType) {
+                    res.status(200).json({
+                      msg: "created successfully",
+                      status: 200,
+                    });
+                    return;
+                  } else {
+                    res.status(400).json({
+                      msg: "Room was not pushed to subRoomType",
+                      status: 400,
+                    });
+                    return;
+                  }
+                }
+              );
+            });
       }
     );
   } catch (err) {
