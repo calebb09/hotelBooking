@@ -408,7 +408,7 @@ exports.signup = function signup(req, res, next) {
             username: body.username,
             role: body.user_type,
           },
-          function callback(err, user) {
+          (err, user) => {
             if (err) {
               return next(err);
             }
@@ -429,7 +429,10 @@ exports.signup = function signup(req, res, next) {
                   if (err) {
                     return next(err);
                   }
-                  workflow.emit("respond", udoc, doc);
+                  return res.status(200).json({
+                    msg: "You Have successfully created Super Admin",
+                    status: 200,
+                  });
                 }
               );
             });
