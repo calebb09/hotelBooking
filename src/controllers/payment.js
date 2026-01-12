@@ -860,7 +860,7 @@ exports.walletRechargeChapa = async (req, res) => {
       txtId,
       "TRIPLAYE",
       `${input.first_name} making payment to Triplaye`,
-      "https://triplaye.com/assets/icons/gojo_logo.png"
+      "https://triplaye.com/assets/icons/triplay_logo.png"
     );
     console.log(saveCharge);
     if (saveCharge.status === 200) {
@@ -1045,7 +1045,7 @@ exports.chapaPay = async (req, res, next) => {
     tx_ref,
     "Triplaye",
     `${first_name} making payment to Triplaye`,
-    "https://triplaye.com/assets/icons/gojo_logo.png"
+    "https://triplaye.com/assets/icons/triplay_logo.png"
   );
   console.log(tx_ref);
   saveChapa.status === 200

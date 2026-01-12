@@ -73,7 +73,7 @@ const chapaDirectPay = async (
       txRef,
       "TRIPLAYE",
       `${firstName} booking room via Triplaye`,
-      "https://triplaye.com/assets/icons/gojo_logo.png"
+      "https://triplaye.com/assets/icons/triplay_logo.png"
     );
 
     if (saveCharge.status === 200) {
