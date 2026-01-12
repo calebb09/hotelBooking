@@ -1,77 +1,103 @@
-const hbs = require("nodemailer-express-handlebars");
-const path = require("path");
-const Config = require("../../config");
-// const DeviceDal = require("../dal/device");
-// const NotifiDal = require("../dal/notification");
+/// the new code
 
-exports = module.exports = function (
+const fs = require("fs");
+const path = require("path");
+const handlebars = require("handlebars");
+const axios = require("axios");
+const Config = require("../config"); // Assuming this is still needed for any config, but adjust if not
+
+exports = module.exports = async function (
   name,
   accommodationInfo,
   bookingDetail,
   email
 ) {
-  if (email !== "") {
-    const dateDifference = getDateDifference(
-      new Date(Config.DATE_READABLE(bookingDetail.checkIn)),
-      new Date(Config.DATE_READABLE(bookingDetail.checkOut))
+  // Skip if no email
+  if (!email || email.length === 0) return;
+
+  // Calculate date difference
+  const dateDifference = getDateDifference(
+    new Date(Config.DATE_READABLE(bookingDetail.checkIn)),
+    new Date(Config.DATE_READABLE(bookingDetail.checkOut))
+  );
+
+  // ---------------- Render Handlebars template ----------------
+  let htmlBody = "";
+  try {
+    const templatePath = path.resolve(
+      __dirname,
+      "../templates/views/booking.handlebars" // Assuming booking-specific template; adjust path if needed
     );
-    let mailOpts = {
-      from: `"Gojo Booking" <${Config.GOJO_EMAIL_USER}>`,
-      to: email, //receiver email address
-      subject: "Booking detail from GojoBooking",
-      template: "booking", // the name of the template file i.e email.handlebars
-      context: {
-        reservation_info: dateDifference + " night[s] ",
-        user_name: name,
-        hotel_name: accommodationInfo.name,
-        hotel_address: accommodationInfo.address.street_address,
-        hotel_phone: accommodationInfo.address.phoneAddress,
-        hote_email: accommodationInfo.address.emailAddress,
-        checkIn: Config.DATE_READABLE(bookingDetail.checkIn),
-        checkOut: Config.DATE_READABLE(bookingDetail.checkOut),
-        guests: bookingDetail.guests,
-        payment_status: bookingDetail.is_paid,
-        payment_detail: bookingDetail.transaction?.toObject?.() || null,
-        total_room_booked: bookingDetail.room.length,
-        copyRightYear: new Date().getFullYear(),
-      },
-    };
-    // point to the template folder
-    const handlebarOptions = {
-      viewEngine: {
-        extName: ".handlebars",
-        partialsDir: path.resolve(__dirname, "../../templates/views"),
-        defaultLayout: false,
-        helpers: {
-          uppercase: function (str) {
-            return (str || "").toUpperCase();
-          },
-          formatAmount: function (amount) {
-            if (typeof amount === "number") {
-              return amount.toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              });
-            }
-            return amount;
-          },
-        },
-      },
-      viewPath: path.resolve(__dirname, "../../templates/views"),
-    };
-    // use a template file with nodemailer
-    Config.MAILER.use("compile", hbs(handlebarOptions));
-    Config.MAILER.sendMail(mailOpts, function (error, info) {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log("Email sent: " + info.response);
-      }
+    const source = fs.readFileSync(templatePath, "utf8");
+    const template = handlebars.compile(source);
+
+    // Register helpers similar to sendMessage if needed, plus booking-specific ones
+    handlebars.registerHelper("newlineToBr", function (text) {
+      const escapedText = handlebars.escapeExpression(text);
+      return new handlebars.SafeString(escapedText.replace(/\n/g, "<br>"));
     });
+    handlebars.registerHelper("eq", function (a, b) {
+      return a === b;
+    });
+    handlebars.registerHelper("uppercase", function (str) {
+      return (str || "").toUpperCase();
+    });
+    handlebars.registerHelper("formatAmount", function (amount) {
+      if (typeof amount === "number") {
+        return amount.toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+      }
+      return amount;
+    });
+
+    htmlBody = template({
+      reservation_info: dateDifference + " night[s] ",
+      user_name: name,
+      hotel_name: accommodationInfo.name,
+      hotel_address: accommodationInfo.address.street_address,
+      hotel_phone: accommodationInfo.address.phoneAddress,
+      hote_email: accommodationInfo.address.emailAddress, // Note: typo in original 'hote_email'
+      checkIn: Config.DATE_READABLE(bookingDetail.checkIn),
+      checkOut: Config.DATE_READABLE(bookingDetail.checkOut),
+      guests: bookingDetail.guests,
+      payment_status: bookingDetail.is_paid,
+      payment_detail: bookingDetail.transaction?.toObject?.() || null,
+      total_room_booked: bookingDetail.room.length,
+      copyRightYear: new Date().getFullYear(),
+    });
+  } catch (err) {
+    console.error(
+      "🚨 Error rendering Handlebars template for booking:",
+      err.message
+    );
+    return; // Exit early on template error
+  }
+
+  // ---------------- Send email via PHP ----------------
+  try {
+    const payload = {
+      token: process.env.GOJO_EMAIL_SECRET,
+      subject: "Booking detail from GojoBooking",
+      message: htmlBody,
+      to: email, // Direct to recipient
+    };
+
+    const phpMailerUrl = `${process.env.GOJO_LIVE_URL}/sendEmail.php`;
+    const res = await axios.post(phpMailerUrl, payload);
+
+    if (res.data.success) {
+      console.log("✅ Booking email sent successfully via cPanel PHP");
+    } else {
+      console.error("❌ PHP mailer failed for booking email:", res.data.error);
+    }
+  } catch (err) {
+    console.error("🚨 Error sending booking email via PHP:", err);
   }
 };
 
-// Function to calculate the difference in days
+// Function to calculate the difference in days (unchanged)
 function getDateDifference(date1, date2) {
   // Ensure dates are valid
   if (isNaN(date1.getTime()) || isNaN(date2.getTime())) {
