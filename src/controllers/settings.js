@@ -47,12 +47,6 @@ exports.fetch = async (req, res, next) => {
 };
 
 exports.createSetting = (req, res, next) => {
-  var validationErrors = req.validationErrors();
-  if (validationErrors) {
-    res.status(400);
-    res.json(validationErrors);
-    return;
-  }
   var body = req.body;
   body.updated_at = new Date();
   body.created_by = req._user._id;
