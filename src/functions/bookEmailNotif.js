@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const handlebars = require("handlebars");
 const axios = require("axios");
-const Config = require("../config"); // Assuming this is still needed for any config, but adjust if not
+const Config = require("../../config"); // Assuming this is still needed for any config, but adjust if not
 
 exports = module.exports = async function (
   name,
