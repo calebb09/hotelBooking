@@ -76,7 +76,7 @@ async function findAvailableAccommodations(
   // Convert city to ObjectId if it's stored as a reference
   let cityQuery = city;
   if (mongoose.isValidObjectId(city)) {
-    cityQuery = mongoose.Types.ObjectId(city);
+    cityQuery = new mongoose.Types.ObjectId(city);
   }
 
   // Retrieve all accommodations for the specified city
