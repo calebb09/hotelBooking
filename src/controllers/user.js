@@ -378,29 +378,31 @@ exports.register = function register(req, res, next) {
   });
 };
 exports.signup = function signup(req, res, next) {
-  var body = req.body;
-  /**
-   * Check for user exist or not
-   */
+  try {
+    var body = req.body;
+    /**
+     * Check for user exist or not
+     */
 
-  UserDal.get(
-    {
-      role: "super_admin",
-    },
-    function cb(err, user) {
-      if (err) {
-        return next(err);
-      }
-      // If user find return it
-      if (user._id) {
-        res.status(400);
-        return res.json({
-          error: true,
-          msg: "User already exists",
-          status: 400,
-        });
-      } //automated crawler blocking
-      else {
+    UserDal.getCollection(
+      {
+        role: "super_admin",
+      },
+      {},
+      function cb(err, user) {
+        if (err) {
+          return next(err);
+        }
+
+        // If user find return it
+        if (user.length > 0) {
+          return res.json({
+            error: true,
+            msg: "User already exists",
+            status: 400,
+          });
+        } //automated crawler blocking
+
         // Create User
         UserDal.create(
           {
@@ -408,7 +410,7 @@ exports.signup = function signup(req, res, next) {
             username: body.username,
             role: body.user_type,
           },
-          (err, user) => {
+          (err, user_doc) => {
             if (err) {
               return next(err);
             }
@@ -418,7 +420,7 @@ exports.signup = function signup(req, res, next) {
               }
               UserDal.update(
                 {
-                  _id: user._id,
+                  _id: user_doc.id,
                 },
                 {
                   internal: doc._id,
@@ -439,8 +441,10 @@ exports.signup = function signup(req, res, next) {
           }
         );
       }
-    }
-  );
+    );
+  } catch (error) {
+    console.log(error);
+  }
 };
 exports.checkPhone = function checkPhone(req, res, next) {
   let query = {

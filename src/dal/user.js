@@ -23,7 +23,7 @@ exports.create = async function create(userData, cb) {
     const userModel = new User(userData);
     const data = await userModel.save();
     // Fetch populated doc
-    // const user = await exports.getPopulated({_id: data._id});
+    const user = await getPopulated({_id: data._id});
     cb(null, user);
   } catch (err) {
     cb(err);
@@ -31,9 +31,9 @@ exports.create = async function create(userData, cb) {
 };
 
 // Helper for populated get (to avoid recursion in create)
-// async function getPopulated(query) {
-//   return User.findOne(query).select(returnFields).populate(population).exec();
-// }
+async function getPopulated(query) {
+  return User.findOne(query).select(returnFields).populate(population).exec();
+}
 
 exports.delete = function deleteItem(query, cb) {
   User.findOne(query, returnFields)
