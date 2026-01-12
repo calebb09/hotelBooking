@@ -26,7 +26,7 @@ exports = module.exports = async function (
   try {
     const templatePath = path.resolve(
       __dirname,
-      "../templates/views/booking.handlebars" // Assuming booking-specific template; adjust path if needed
+      "../../templates/views/booking.handlebars" // Assuming booking-specific template; adjust path if needed
     );
     const source = fs.readFileSync(templatePath, "utf8");
     const template = handlebars.compile(source);

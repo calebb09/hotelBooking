@@ -40,7 +40,7 @@ exports = module.exports = async function (
   try {
     const templatePath = path.resolve(
       __dirname,
-      "../templates/views/email.handlebars"
+      "../../templates/views/email.handlebars"
     );
     const source = fs.readFileSync(templatePath, "utf8");
     const template = handlebars.compile(source);
