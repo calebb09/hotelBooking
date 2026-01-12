@@ -144,7 +144,7 @@ exports.create = (req, res, next) => {
                   }
                   // pushit to subroomtype
                   const updatesubRoomType = await subRoomType.findOneAndUpdate(
-                    body.subRoomType,
+                    {_id: body.subRoomType},
                     {
                       $push: {rooms: room_document._id},
                     },
