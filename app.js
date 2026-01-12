@@ -34,13 +34,13 @@ app.set("port", config.PORT);
 // =======================
 app.use(cors(config.CORS_OPTS));
 // 👇 Serve uploaded files
-app.use("/public", express.static("uploads"));
+app.use("/public", express.static("public"));
 // Middlewares
 app.use(morgan("dev"));
 app.use(bodyParserMiddleware.json);
 app.use(bodyParserMiddleware.urlencoded);
 app.use(multerMiddleware.any());
-// app.use(express.static("public"));
+app.use(express.static("public"));
 const swaggerOptions = require("./config/swagger");
 const specs = swaggerJSDOC(swaggerOptions);
 app.use(
