@@ -1092,10 +1092,8 @@ exports.reviewAccommodation = async (req, res, next) => {
     message = {
       notification: {
         title: "Property Verified",
-        body:
-          "Dear " +
-          // req.doc.created_by.internal.first_name +
-          "! The license you sent us is approved and verified. You property is now listed on our web. Start adding rooms",
+        body: `Dear 
+         ${req.doc.created_by.internal.first_name}! The license you sent us is approved and verified. You property is now listed on our web. Start adding rooms`,
       },
     };
     // please post newly created accommodation on telegram
