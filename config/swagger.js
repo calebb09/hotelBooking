@@ -2,7 +2,7 @@ const swaggerOptions = {
   definition: {
     openapi: "3.0.3",
     info: {
-      title: "OPEN API DOCS - for Triplaye-Booking",
+      title: "OPEN API DOCS - for Triplaye",
       version: "1.0.11",
       description: `Triplaye Booking API is a RESTful service designed to power booking and reservation
                     workflows for web and mobile platforms.

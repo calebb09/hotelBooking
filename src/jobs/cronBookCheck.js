@@ -108,7 +108,7 @@ module.exports = () => {
 
                            Sincerely,
                            ${data.accommodation.name}
-                           Gojo Booking`,
+                           Triplaye`,
                       },
                     };
 

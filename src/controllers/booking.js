@@ -347,7 +347,7 @@ exports.requestBooking = async (req, res, next) => {
       checkOut: new Date(checkOut),
       tx_ref:
         req.body.currency_type === "ETB"
-          ? `triplaye-booking-${uuidv4()}`
+          ? `triplaye-${uuidv4()}`
           : `international-booking-${uuidv4()}`,
       guests,
       withBreakFast: req.body.withBreakFast,
@@ -366,7 +366,7 @@ exports.requestBooking = async (req, res, next) => {
     let message = {
       notification: {
         title: "New Booking Request",
-        body: `A new booking request has been made for ${accomInfo.name}.\n\n Please log into your Gojo account to view and manage the booking details.`,
+        body: `A new booking request has been made for ${accomInfo.name}.\n\n Please log into your Triplaye account to view and manage the booking details.`,
       },
     };
 

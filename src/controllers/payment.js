@@ -492,7 +492,7 @@ exports.directPay = async (req, res, next) => {
 };
 exports.localPay = async (req, res, next) => {
   try {
-    var txtId = `gojo-booking-${uuidv4()}`; // Always generate a new UUID
+    var txtId = `triplaye-${uuidv4()}`; // Always generate a new UUID
     var price_query = {};
     const getConversionRate = await currencyConvert();
     if (getConversionRate.status === 200) {
@@ -842,7 +842,7 @@ exports.walletRechargeChapa = async (req, res) => {
     if (!amount || !phone_number || !last_name || !first_name || !email) {
       return res.status(400).json({msg: "All fields are required."});
     }
-    var txtId = `gojo-recharge-${uuidv4()}`; // Always generate a new UUID
+    var txtId = `triplaye-recharge-${uuidv4()}`; // Always generate a new UUID
     const input = {
       ...req.body,
       currency: "ETB",
@@ -858,9 +858,9 @@ exports.walletRechargeChapa = async (req, res) => {
       input.last_name,
       input.phone_number,
       txtId,
-      "GOJO Booking",
-      `${input.first_name} making payment to GojoBooking`,
-      "https://gojobooking.com/assets/icons/gojo_logo.png"
+      "TRIPLAYE",
+      `${input.first_name} making payment to Triplaye`,
+      "https://triplaye.com/assets/icons/gojo_logo.png"
     );
     console.log(saveCharge);
     if (saveCharge.status === 200) {
@@ -1034,7 +1034,7 @@ exports.pendingPay = async (req, res) => {
 exports.chapaPay = async (req, res, next) => {
   const {amount, currency, email, first_name, last_name, phone_number} =
     req.body;
-  const tx_ref = `gojo-book-${uuidv4()}`; // Unique transaction reference
+  const tx_ref = `triplaye-${uuidv4()}`; // Unique transaction reference
   const saveChapa = await createPayment(
     amount,
     currency,
@@ -1043,9 +1043,9 @@ exports.chapaPay = async (req, res, next) => {
     last_name,
     phone_number,
     tx_ref,
-    "GOJO BOOKING",
-    `${first_name} making payment to GojoBooking`,
-    "https://gojobooking.com/assets/icons/gojo_logo.png"
+    "Triplaye",
+    `${first_name} making payment to Triplaye`,
+    "https://triplaye.com/assets/icons/gojo_logo.png"
   );
   console.log(tx_ref);
   saveChapa.status === 200
@@ -1064,7 +1064,7 @@ exports.chapaCharge = async (req, res) => {
     if (!amount || !currency || !mobile || !payment_method) {
       return res.status(400).json({msg: "All fields are required."});
     }
-    var txtId = `gojo-book-${uuidv4()}`; // Always generate a new UUID
+    var txtId = `tripaye-${uuidv4()}`; // Always generate a new UUID
     const input = {...req.body, tx_ref: txtId}; // Ensure tx_ref is included
 
     console.log("Sending to Chapa:", input);

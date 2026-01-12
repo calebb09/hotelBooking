@@ -79,7 +79,7 @@ exports = module.exports = async function (
   try {
     const payload = {
       token: process.env.GOJO_EMAIL_SECRET,
-      subject: "Booking detail from GojoBooking",
+      subject: "Booking detail from Triplaye.com",
       message: htmlBody,
       to: email, // Direct to recipient
     };

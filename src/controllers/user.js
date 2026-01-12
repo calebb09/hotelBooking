@@ -300,7 +300,7 @@ exports.register = function register(req, res, next) {
     var password = config.GOJO_DEFAULT;
     var reset_token = buff.toString("hex");
     var token_expires = Date.now() + 21600000; //6hr
-    var reset_link_address = "https://gojobooking.com/auth/verify-owner";
+    var reset_link_address = "https://triplaye.com/auth/verify-owner";
     if (!req.files) {
       res.status(400).json({msg: "must upload business licence"});
     } else {
@@ -350,17 +350,17 @@ exports.register = function register(req, res, next) {
                     );
                     let message = {
                       notification: {
-                        title: "Registered Successfully on GojoBooking",
+                        title: "Registered Successfully on Triplaye",
                         body:
                           "Dear " +
                           body.first_name +
-                          "\n\n. Congratulations on your successful registration at GojoBooking website. Please click the following link to activate your account \n" +
+                          "\n\n. Congratulations on your successful registration at Triplaye website. Please click the following link to activate your account \n" +
                           reset_link_address +
                           "?email=" +
                           body.email +
                           "&token=" +
                           reset_token +
-                          "\n\nPlease keep in mind that the Gojo team will review your property. We will send you an email once the review is over!",
+                          "\n\nPlease keep in mind that the Triplaye team will review your property. We will send you an email once the review is over!",
                       },
                     };
                     sendMessage(message, null, null, "to", body.email);
@@ -522,7 +522,7 @@ exports.create_reception = (req, res, next) => {
 };
 exports.forgotPassword = function forgotPassword(req, res, next) {
   var body = req.body;
-  var reset_link_address = "https://gojo.com";
+  var reset_link_address = "https://triplaye.com";
 
   // req
   //   .checkBody("username")
@@ -670,13 +670,13 @@ exports.activateAccount = function activateAccount(req, res, next) {
                 body_message =
                   "Dear " +
                   user.internal.first_name +
-                  "\n\n. Gojo reviewed and approved your account information. You can now login to your Gojo Account and list your property \n";
+                  "\n\n. Triplaye reviewed and approved your account information. You can now login to your Triplaye Account and list your property \n";
               } else {
                 msg_title = "Account Rejected";
                 body_message =
                   "Dear " +
                   user.internal.first_name +
-                  "\n\n. Gojo has reviewed and rejected your account! Reason of rejection is because " +
+                  "\n\n. Triplaye has reviewed and rejected your account! Reason of rejection is because " +
                   req.body.reason +
                   " \n";
               }

@@ -102,12 +102,12 @@ exports = module.exports.directPay = async function (
             customer: customer.id,
             description: "Booking a room",
             metadata: {
-              from: "GojoBooking",
+              from: "Triplaye",
               customer_name: full_name,
               customer_email: email,
               customer_phone: phone,
             },
-            receipt_email: "info@gojobooking.com",
+            receipt_email: "info@triplaye.com",
           })
       )
       .then(

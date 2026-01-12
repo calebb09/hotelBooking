@@ -78,7 +78,7 @@ exports = module.exports = async function (a, b, c, d, e, f) {
                                     } else {
                                       refund_response.push(
                                         400,
-                                        "gojo balance not restored"
+                                        "triplaye balance not restored"
                                       );
                                     }
                                   })

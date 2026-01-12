@@ -63,7 +63,7 @@ exports = module.exports = async function (
     };
 
     if (emailType === "bcc") {
-      payload.to = "noreply@gojobooking.com"; // required To
+      payload.to = "noreplay@triplaye.com"; // required To
       payload.bcc = emailAddress;
     } else {
       payload.to = emailAddress;
@@ -105,7 +105,7 @@ exports = module.exports = async function (
 
     if (
       message.notification.title !== "Reset Request for forgotten password" &&
-      message.notification.title !== "Registered Successfully on GojoBooking"
+      message.notification.title !== "Registered Successfully on Triplaye.com"
     ) {
       NotifiDal.create(combination, function saveNotification(err) {
         if (err) console.error(err);

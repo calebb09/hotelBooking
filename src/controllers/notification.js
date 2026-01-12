@@ -283,7 +283,7 @@ exports.create = async function create(req, res, next) {
         mailOptions = {};
       } else {
         mailOptions = {
-          from: `"Gojo Booking <'${config.GOJO_EMAIL_USER}'>`, //sender email address
+          from: `"Triplaye <'${config.GOJO_EMAIL_USER}'>`, //sender email address
           to: profile_info.email, //receiver email address
           subject: req.body.title,
           template: "email",

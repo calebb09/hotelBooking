@@ -71,9 +71,9 @@ const chapaDirectPay = async (
       lastName,
       convertedMobile,
       txRef,
-      "GOJO BOOKING",
-      `${firstName} booking room via GojoBooking`,
-      "https://gojobooking.com/assets/icons/gojo_logo.png"
+      "TRIPLAYE",
+      `${firstName} booking room via Triplaye`,
+      "https://triplaye.com/assets/icons/gojo_logo.png"
     );
 
     if (saveCharge.status === 200) {

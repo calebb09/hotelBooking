@@ -68,7 +68,7 @@ async function acceptBooking(
         body: `Dear ${firstName}!
           
           Your booking request has been accepted. Please complete your payment to confirm your booking ASAP before it expires.
-          Please use this link to pay https://gojobooking.com/my-bookings?id=${txtID}`,
+          Please use this link to pay https://triplaye.com/my-bookings?id=${txtID}`,
       },
     };
     sendMessage(message, userUid, roomDetail[0].accommodation, "to", email);

@@ -196,8 +196,7 @@ exports.register = (req, res, next) => {
                 {account_created_with_email: true, updated_at: new Date()}
               );
               /** send email */
-              var reset_link_address =
-                "https://gojobooking.com/auth/verify-email";
+              var reset_link_address = "https://triplaye.com/auth/verify-email";
               let fName = body.full_name.split(" "),
                 giveName = fName[0];
               let message = {
@@ -206,11 +205,11 @@ exports.register = (req, res, next) => {
                   body:
                     "Dear " +
                     giveName +
-                    ".\n\n Congratulations on your successful registration at GojoBooking website. Please click the following link to activate your account \n" +
+                    ".\n\n Congratulations on your successful registration at Triplaye website. Please click the following link to activate your account \n" +
                     reset_link_address +
                     "?email=" +
                     body.email +
-                    "\n\nYou recieved this email because you registered on GojoBooking website",
+                    "\n\nYou recieved this email because you registered on Triplaye website",
                 },
               };
               sendMessage(message, null, null, "to", body.email);

@@ -18,7 +18,7 @@ const router = express.Router();
  *        picrure:
  *          type: string
  *          description: get image from an external url or upload it on your server and fetch from it [recommended]
- *          example: https://gojobooking.com/images/cities/1.jpg
+ *          example: https://triplaye.com/images/cities/1.jpg
  *     City:
  *       type: object
  *       required:

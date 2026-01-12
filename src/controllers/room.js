@@ -149,7 +149,7 @@ exports.create = (req, res, next) => {
                 }
                 hotel_document === null
                   ? res.status(400).json({
-                      msg: "your accommodation is not verified by GojoBooking",
+                      msg: "your accommodation is not verified by Triplaye",
                     })
                   : Object.keys(hotel_document).length === 0
                   ? res.status(400).json({
