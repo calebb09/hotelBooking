@@ -108,12 +108,12 @@ exports.create = (req, res, next) => {
   try {
     var body = req.body;
     body.created_by = req._user._id;
-    var validationErrors = req.validationErrors();
-    if (validationErrors) {
-      res.status(400);
-      res.json(validationErrors);
-      return;
-    }
+    // var validationErrors = req.validationErrors();
+    // if (validationErrors) {
+    //   res.status(400);
+    //   res.json(validationErrors);
+    //   return;
+    // }
 
     RoomDal.getCollection(
       {
