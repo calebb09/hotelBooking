@@ -15,7 +15,7 @@ var ClientSchema = new Schema({
   },
   picture: {
     type: String,
-    default: "uploads/default_profile.png",
+    default: "default_profile.png",
   },
   full_name: {
     type: String,

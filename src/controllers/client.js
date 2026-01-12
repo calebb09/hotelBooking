@@ -172,7 +172,7 @@ exports.register = (req, res, next) => {
     }
     var profile_image = "";
     if (req.body.picture == undefined || req.body.picture == "") {
-      profile_image = "uploads/default_profile.png";
+      profile_image = "default_profile.png";
     } else {
       profile_image = req.body.picture;
     }

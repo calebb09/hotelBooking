@@ -332,7 +332,7 @@ exports.register = function register(req, res, next) {
                     first_name: body.first_name,
                     last_name: body.last_name,
                     created_by: usr.id,
-                    licence: "uploads/" + req.files[0].filename,
+                    licence: req.files[0].filename,
                   },
                   (err, internal_doc) => {
                     if (err) {

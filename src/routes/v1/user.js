@@ -409,7 +409,7 @@ router.post(
  *        in: path
  *        require: true
  *        description: must upload a business licence
- *        example: "uploads/349852352435.jpg"
+ *        example: "349852352435.jpg"
  *        type: string
  *     security:
  *     -   bearerAuth: []

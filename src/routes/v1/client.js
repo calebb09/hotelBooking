@@ -55,7 +55,7 @@ const router = express.Router();
  *        picrure:
  *          type: string
  *          description: get image from an external url or upload it on your server and fetch from it [recommended]
- *          example: uploads/default_picture.png
+ *          example: default_picture.png
  *        phone:
  *          type: number
  *          example: +25194324854545

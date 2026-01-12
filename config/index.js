@@ -128,7 +128,7 @@ module.exports = {
     FILE_SIZE: 1 * 1024 * 1024, // 2MB,
     URL: dotenv.parsed.API_URL + "/media/",
     FILES_FOLDER: path.resolve(process.cwd(), "./media") + "/",
-    UPLOADES: path.resolve(process.cwd(), "./public/uploads") + "/",
+    UPLOADES: path.resolve(process.cwd(), "./public") + "/",
     UPLOADS: path.resolve(process.cwd(), "./public") + "/",
   },
   STRiPE: {

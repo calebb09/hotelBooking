@@ -251,8 +251,8 @@ const router = express.Router();
  *          type: array
  *          description: upload as many picture as you want to
  *          example:
- *            - /uploads/3235452345423.png
- *            - /uploads/4852941442352435.jpg
+ *            - /3235452345423.png
+ *            - /4852941442352435.jpg
  *     ApplicationStatus:
  *       type: object
  *       required:
