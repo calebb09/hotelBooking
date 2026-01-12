@@ -55,7 +55,7 @@ async function processRecharge(item, paymentData) {
       const message = {
         notification: {
           title: "Wallet Recharged",
-          body: `Your Gojo Booking Wallet has been successfully recharged. Please log in to your account to view your updated balance.`,
+          body: `Your Triplaye Wallet has been successfully recharged. Please log in to your account to view your updated balance.`,
         },
       };
       sendMessage(
@@ -204,7 +204,7 @@ async function failTransaction(
   if (paymentInfo.status !== "pending") {
     //gojo reference starting with gojo-recharge
     function isGojoRechargeRef(reference) {
-      return reference.startsWith("gojo-recharge-");
+      return reference.startsWith("triplaye-recharge-");
     }
     const isRecharge = isGojoRechargeRef(reference);
     let input = {
