@@ -894,16 +894,16 @@ exports.walletRechargeChapa = async (req, res) => {
 };
 exports.pendingPay = async (req, res) => {
   try {
-    req
-      .checkBody("stripeToken")
-      .notEmpty()
-      .withMessage("StripeToken is required");
-    var validationErrors = req.validationErrors();
-    if (validationErrors) {
-      res.status(400);
-      res.json(validationErrors);
-      return;
-    }
+    // req
+    //   .checkBody("stripeToken")
+    //   .notEmpty()
+    //   .withMessage("StripeToken is required");
+    // var validationErrors = req.validationErrors();
+    // if (validationErrors) {
+    //   res.status(400);
+    //   res.json(validationErrors);
+    //   return;
+    // }
     let price_query = {};
     let serviceCharge = "20%";
 

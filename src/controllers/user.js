@@ -378,6 +378,7 @@ exports.register = function register(req, res, next) {
   });
 };
 exports.signup = function signup(req, res, next) {
+  var body = req.body;
   /**
    * Check for user exist or not
    */
