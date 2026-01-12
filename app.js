@@ -33,7 +33,8 @@ app.set("port", config.PORT);
 // ENABLE CORS
 // =======================
 app.use(cors(config.CORS_OPTS));
-
+// 👇 Serve uploaded files
+app.use("/public", express.static("public"));
 // Middlewares
 app.use(morgan("dev"));
 app.use(bodyParserMiddleware.json);
