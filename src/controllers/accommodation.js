@@ -500,6 +500,7 @@ exports.subRoomType = async (req, res, next) => {
           .exec();
 
         return {
+          type: "single",
           ...sub,
           rooms, // Attach full room details
           number_of_rooms: rooms.length, // Derived count
@@ -1093,7 +1094,7 @@ exports.reviewAccommodation = async (req, res, next) => {
       notification: {
         title: "Property Verified",
         body: `Dear 
-         ${req.doc.created_by.internal.first_name}! The license you sent us is approved and verified. You property is now listed on our web. Start adding rooms`,
+         ${req.doc.created_by.internal.first_name}! The license you sent us is approved and verified. Your property is now listed on our web. Start adding rooms`,
       },
     };
     // please post newly created accommodation on telegram
