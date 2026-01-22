@@ -60,7 +60,7 @@ exports.validateTransaction = function validateTransaction(req, res, next, id) {
           msg: "Transaction _id " + id + " not found",
         });
       }
-    }
+    },
   );
 };
 exports.verifyPayment = async (req, res) => {
@@ -137,7 +137,7 @@ exports.verifyPayment = async (req, res) => {
                   update_at: new Date(),
                   status: balance_status,
                 },
-                {new: true}
+                {new: true},
               );
               // update the chapaStore
               const updateChapaStore = await Chapa.findByIdAndUpdate(
@@ -155,10 +155,10 @@ exports.verifyPayment = async (req, res) => {
                 },
                 {
                   new: true,
-                }
+                },
               );
             }
-          }
+          },
         );
 
         // check if reason is booking
@@ -179,13 +179,13 @@ exports.verifyPayment = async (req, res) => {
                 statusValue === "failed/cancelled"
                   ? "cancelled"
                   : statusValue === "success"
-                  ? "booked"
-                  : statusValue,
+                    ? "booked"
+                    : statusValue,
               updated_at: new Date(),
             },
             {
               new: true,
-            }
+            },
           );
 
           // transfer money to hotel
@@ -193,7 +193,7 @@ exports.verifyPayment = async (req, res) => {
           if (statusValue === "success") {
             const paytoBook = await user2HotelTransfer(
               checkChapa,
-              chapaTransaction.data.data.reference
+              chapaTransaction.data.data.reference,
             );
           }
         }
@@ -202,7 +202,7 @@ exports.verifyPayment = async (req, res) => {
           uid = null;
         } else {
           const getClientUid = await Client.findById(
-            checkChapa.transaction.user_information.user
+            checkChapa.transaction.user_information.user,
           );
           uid = getClientUid;
         }
@@ -287,7 +287,7 @@ exports.directPay = async (req, res, next) => {
 
     let children_age_limit = 18;
     let exceedingNumbers = req.body.children_age.filter(
-      (num) => num > children_age_limit
+      (num) => num > children_age_limit,
     );
     if (exceedingNumbers.length === 0) {
       errors.push();
@@ -401,7 +401,7 @@ exports.directPay = async (req, res, next) => {
             "booking",
             roomDetail,
             serviceCharge,
-            req.body
+            req.body,
           )
             .then((data) => {
               data[2] === 201
@@ -418,7 +418,7 @@ exports.directPay = async (req, res, next) => {
             });
             console.log(addedTransactiondocument);
             let book_create_doc = await BookingMdl.create(
-              addedTransactiondocument
+              addedTransactiondocument,
             );
 
             let user_doc = await UserModel.find({
@@ -435,10 +435,10 @@ exports.directPay = async (req, res, next) => {
             });
 
             let checkInformattedDate = config.DATE_READABLE(
-              book_create_doc.checkIn
+              book_create_doc.checkIn,
             );
             let checkOutformattedDate = config.DATE_READABLE(
-              book_create_doc.checkOut
+              book_create_doc.checkOut,
             );
             /** you need a notification alert */
             let howmanyRooms = roomDetail.length;
@@ -460,7 +460,7 @@ exports.directPay = async (req, res, next) => {
                 {
                   $push: {booking_calendar: book_create_doc.id},
                   updated_at: new Date(),
-                }
+                },
               );
             }
 
@@ -469,7 +469,7 @@ exports.directPay = async (req, res, next) => {
               null,
               roomDetail[0].accommodation,
               "bcc",
-              email_lists
+              email_lists,
             );
             res.status(200).json({
               msg: "book request sent",
@@ -585,7 +585,7 @@ exports.localPay = async (req, res, next) => {
         req.body.email,
         req.body.first_name,
         req.body.last_name,
-        req.body
+        req.body,
       );
 
       if (startRequest.statusCode === 200 || startRequest.statusCode === 201) {
@@ -642,7 +642,7 @@ exports.walletPay = async (req, res, next) => {
         await RoomMdl.findOne({
           _id: req.body.room[i],
         }).then((data) =>
-          data === null ? room_doc.push() : room_doc.push(data)
+          data === null ? room_doc.push() : room_doc.push(data),
         );
       }
       let {totalPrice, currentRate} = 0;
@@ -667,7 +667,7 @@ exports.walletPay = async (req, res, next) => {
             "Room Booking",
             serviceCharge,
             req.body.currency_type,
-            currentRate
+            currentRate,
           )
             .then((data) => {
               data[2] === 201
@@ -701,7 +701,7 @@ exports.walletPay = async (req, res, next) => {
                             {
                               $push: {booking_calendar: created_doc.id},
                               updated_at: new Date(),
-                            }
+                            },
                           );
                         }
                         res.status(201).json({msg: "successful", status: 201});
@@ -711,7 +711,7 @@ exports.walletPay = async (req, res, next) => {
                           status: 400,
                         });
                       }
-                    }
+                    },
                   )
                 : res.status(data[2]).json({msg: data[1]});
             })
@@ -771,7 +771,7 @@ exports.rechargeWallet = async (req, res, next) => {
             "added",
             "recharge",
             null,
-            null
+            null,
           );
           console.log(stripePay);
           stripePay[2] === 201
@@ -818,7 +818,7 @@ exports.clientChargeWallet = async (req, res, next) => {
         "added",
         "recharge",
         null,
-        null
+        null,
       )
         .then((stripePay) => {
           stripePay[2] === 201
@@ -860,7 +860,7 @@ exports.walletRechargeChapa = async (req, res) => {
       txtId,
       "TRIPLAYE",
       `${input.first_name} making payment to Triplaye`,
-      "https://triplaye.com/assets/icons/triplay_logo.png"
+      "https://triplaye.com/assets/icons/triplay_logo.png",
     );
     console.log(saveCharge);
     if (saveCharge.status === 200) {
@@ -975,7 +975,7 @@ exports.pendingPay = async (req, res) => {
         "booking",
         getBooking.room,
         serviceCharge,
-        getBooking
+        getBooking,
       );
       //display output
       if (paywithStripe[0] === "ok") {
@@ -989,7 +989,7 @@ exports.pendingPay = async (req, res) => {
             is_paid: true,
             updated_at: new Date(),
           },
-          {new: true}
+          {new: true},
         );
         for (let i = 0; i < updateBooking.room.length; i++) {
           await RoomMdl.findOneAndUpdate(
@@ -1003,7 +1003,7 @@ exports.pendingPay = async (req, res) => {
               if (err) {
                 return next(err);
               }
-            }
+            },
           );
         }
         // notify the client
@@ -1015,7 +1015,7 @@ exports.pendingPay = async (req, res) => {
           getBooking,
           getBooking.created_by.has_account
             ? getBooking.created_by.client.email
-            : getBooking.created_by.guest.email
+            : getBooking.created_by.guest.email,
         );
         return res.status(paywithStripe[2]).json({msg: paywithStripe[0]});
       } else {
@@ -1045,7 +1045,7 @@ exports.chapaPay = async (req, res, next) => {
     tx_ref,
     "Triplaye",
     `${first_name} making payment to Triplaye`,
-    "https://triplaye.com/assets/icons/triplay_logo.png"
+    "https://triplaye.com/assets/icons/triplay_logo.png",
   );
   console.log(tx_ref);
   saveChapa.status === 200
@@ -1086,7 +1086,7 @@ exports.chapaBank = async (req, res) => {
       amount,
       currency,
       bank_code,
-      reference
+      reference,
     )
       .then((response) => {
         let output = JSON.parse(response);
@@ -1110,7 +1110,7 @@ exports.chapaSearch = async (req, res) => {
     const showLists = await bankLists();
     if (showLists.status === 200) {
       const bank = showLists.data.data.filter(
-        (b) => b.swift === req.body.swiftcode
+        (b) => b.swift === req.body.swiftcode,
       );
 
       res.status(200).json(bank);
