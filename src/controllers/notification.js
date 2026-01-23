@@ -548,10 +548,6 @@ exports.markRead = async function MarkAsRead(req, res, next) {
         }
 
         console.log("marked as read");
-        // res.status(200).json({
-        //   msg: "marked as read",
-        //   status: 200,
-        // });
       },
     );
   }
