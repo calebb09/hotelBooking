@@ -15,7 +15,7 @@ const swaggerJSDOC = require("swagger-jsdoc");
 const {startCronJobs} = require("./src/jobs/");
 const fireadmin = require("firebase-admin");
 const serviceAccount = require(`./config/firebase/${config.SERVICE_ACCT}`);
-const ipWhitelist = require("./middleware/ipWhitelist.js");
+// const ipWhitelist = require("./middleware/ipWhitelist.js");
 const cors = require("cors");
 // Firebase
 fireadmin.initializeApp({
