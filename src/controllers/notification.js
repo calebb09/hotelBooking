@@ -546,15 +546,12 @@ exports.markRead = async function MarkAsRead(req, res, next) {
         if (err) {
           return next(err);
         }
-        if (doc && doc._id) {
-          console.log("marked as read");
-          // res.status(200).json({
-          //   msg: "marked as read",
-          //   status: 200,
-          // });
-        } else {
-          console.log("error occured did not mark as read");
-        }
+
+        console.log("marked as read");
+        // res.status(200).json({
+        //   msg: "marked as read",
+        //   status: 200,
+        // });
       },
     );
   }
