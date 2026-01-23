@@ -36,7 +36,7 @@ exports.validateNotifi = function validateNotifi(req, res, next, id) {
           msg: "Notifi _id " + id + " not found",
         });
       }
-    }
+    },
   );
 };
 exports.fetchAll = function fetchAll(req, res, next) {
@@ -62,7 +62,7 @@ exports.fetchAll = function fetchAll(req, res, next) {
           skip: page,
           total: notification_doc.total,
         });
-      }
+      },
     );
   } catch (e) {
     res.status(500).json({
@@ -121,7 +121,7 @@ exports.showall = async function broadCastedMessages(req, res, next) {
             total: doc.total,
           });
         }
-      }
+      },
     );
   });
 };
@@ -176,7 +176,7 @@ exports.viewAll = async (req, res, next) => {
             total: doc.total,
           });
         }
-      }
+      },
     );
   });
 };
@@ -239,7 +239,7 @@ exports.fetchOne = function fetchOne(req, res, next) {
         if (err) {
           return next(err);
         }
-      }
+      },
     );
   }
   res.json(req.doc);
@@ -445,7 +445,7 @@ exports.create = async function create(req, res, next) {
                   .sendToDevice(
                     registrationToken[n],
                     message,
-                    config.FIREBASE_NOTE_OPTS
+                    config.FIREBASE_NOTE_OPTS,
                   )
                   .then((response) => {
                     //res.status(200).send("Notification sent successfully")
@@ -497,7 +497,7 @@ exports.readAll = async (req, res, next) => {
           status: 200,
           msg: "successful",
         });
-      }
+      },
     );
   }
 };
@@ -546,7 +546,7 @@ exports.markRead = async function MarkAsRead(req, res, next) {
         if (err) {
           return next(err);
         }
-        if (doc.modifiedCount > 0) {
+        if (doc && doc._id) {
           res.status(200).json({
             msg: "marked as read",
             status: 200,
@@ -557,7 +557,7 @@ exports.markRead = async function MarkAsRead(req, res, next) {
             status: 400,
           });
         }
-      }
+      },
     );
   }
 };
@@ -615,7 +615,7 @@ exports.markUnread = async function MarkAsUnread(req, res, next) {
             status: 400,
           });
         }
-      }
+      },
     );
   }
 };
@@ -632,7 +632,7 @@ exports.update = function update(req, res, next) {
         return next(err);
       }
       res.json(doc);
-    }
+    },
   );
 };
 exports.deleteNotifi = (req, res, next) => {
@@ -648,7 +648,7 @@ exports.deleteNotifi = (req, res, next) => {
         status: 200,
         msg: "successful",
       });
-    }
+    },
   );
 };
 function removeNotification(req, res, next) {
@@ -663,7 +663,7 @@ function removeNotification(req, res, next) {
       cats,
       function (data, callback) {
         var diffDays = Math.round(
-          Math.abs((current - data.created_at) / oneDay)
+          Math.abs((current - data.created_at) / oneDay),
         );
         if (diffDays > 30) {
           NotifiDal.delete(
@@ -674,7 +674,7 @@ function removeNotification(req, res, next) {
               if (err) {
                 return next(err);
               }
-            }
+            },
           );
         }
         callback(null);
@@ -685,7 +685,7 @@ function removeNotification(req, res, next) {
         } else {
           //res.json(cats);
         }
-      }
+      },
     );
   });
 }
