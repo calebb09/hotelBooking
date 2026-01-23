@@ -4,7 +4,7 @@ const sendMessage = require("../functions/sendMessage");
 const Property = require("../models/accommodation");
 const User = require("../models/user");
 const Client = require("../models/client");
-
+// Run every minute
 module.exports = () => {
   cron.schedule("* * * * *", async () => {
     const now = new Date();
