@@ -15,6 +15,7 @@ const swaggerJSDOC = require("swagger-jsdoc");
 const {startCronJobs} = require("./src/jobs/");
 const fireadmin = require("firebase-admin");
 const serviceAccount = require(`./config/firebase/${config.SERVICE_ACCT}`);
+const ipWhitelist = require("./middleware/ipWhitelist.js");
 const cors = require("cors");
 // Firebase
 fireadmin.initializeApp({
@@ -40,6 +41,7 @@ app.use(morgan("dev"));
 app.use(bodyParserMiddleware.json);
 app.use(bodyParserMiddleware.urlencoded);
 app.use(multerMiddleware.any());
+// app.use(ipWhitelist); // IP Whitelist Middleware
 app.use(express.static("public"));
 const swaggerOptions = require("./config/swagger");
 const specs = swaggerJSDOC(swaggerOptions);
@@ -47,7 +49,7 @@ app.use(
   "/api-docs",
   basicAuth({users: {CDIWORK: config.SWAGGER_PASS}, challenge: true}),
   swaggerUi.serve,
-  swaggerUi.setup(specs)
+  swaggerUi.setup(specs),
 );
 
 // Routes
@@ -55,7 +57,7 @@ routes(app);
 
 // 404 handler
 app.use((req, res, next) =>
-  next(Object.assign(new Error("Resource Requested Not Found"), {status: 404}))
+  next(Object.assign(new Error("Resource Requested Not Found"), {status: 404})),
 );
 
 // Error handler
@@ -73,7 +75,7 @@ socketEvents(io);
 server.listen(config.PORT);
 server.on("error", (err) => console.error(err));
 server.on("listening", () =>
-  console.log(`Server listening on port ${config.PORT}`)
+  console.log(`Server listening on port ${config.PORT}`),
 );
 
 // Start cron jobs
