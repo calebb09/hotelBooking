@@ -39,7 +39,7 @@ exports.update = function update(query, updates, cb) {
   NotificationRequest.findOneAndUpdate(query, updates, opts)
     .populate(population) // Chain populate after findOneAndUpdate
     .exec() // 👈 Promise-based
-    .then((doc) => cb(null, doc || {}))
+    .then((doc) => cb(null, doc))
     .catch((err) => cb(err));
 };
 
@@ -63,7 +63,7 @@ exports.getCollection = function getCollection(query, opt, cb) {
 exports.getCollectionByPagination = function getCollectionByPagination(
   query,
   qs,
-  cb
+  cb,
 ) {
   debug("fetching a collection of notifications"); // Fixed: Minor capitalization for consistency
 
