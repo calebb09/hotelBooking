@@ -56,7 +56,7 @@ exports.validateBooking = function validateBooking(req, res, next, id) {
           msg: "Booking _id " + id + " not found",
         });
       }
-    }
+    },
   );
 };
 exports.fetchAll = async function fetchAll(req, res, next) {
@@ -232,7 +232,7 @@ exports.bookingManually = async function manualCreateBooking(req, res, next) {
                         if (err) {
                           return next(err);
                         }
-                      }
+                      },
                     );
                   }
                   body.email === undefined ||
@@ -243,14 +243,14 @@ exports.bookingManually = async function manualCreateBooking(req, res, next) {
                         body.name,
                         document.accommodation,
                         document,
-                        body.email
+                        body.email,
                       );
                   res.status(200).json({msg: "reserved"});
                 }
               } else {
                 res.status(400).json({msg: "reservation not created"});
               }
-            }
+            },
           );
         } else {
           res.status(404).json({msg: "room does not exist"});
@@ -366,14 +366,14 @@ exports.requestBooking = async (req, res, next) => {
     let message = {
       notification: {
         title: "New Booking Request",
-        body: `A new booking request has been made for ${accomInfo.name}.\n\n Please log into your Triplaye account to view and manage the booking details.`,
+        body: `A new booking request has been made for ${accomInfo.name.en}.\n\n Please log into your Triplaye account to view and manage the booking details.`,
       },
     };
 
     let userMessage = {
       notification: {
         title: "Booking Request Received",
-        body: `We have received your booking request for ${accomInfo.name}. Our team is currently reviewing your request and will get back to you shortly with confirmation and further details.
+        body: `We have received your booking request for ${accomInfo.name.en}. Our team is currently reviewing your request and will get back to you shortly with confirmation and further details.
         
         Thank you for choosing us!`,
       },
@@ -468,7 +468,7 @@ exports.requestBookingWallet = async (req, res, next) => {
       room,
       currency_type,
       serviceCharge,
-      req.body
+      req.body,
     );
     if (fetchRoomPrice.status !== "ok") {
       return res
@@ -479,7 +479,7 @@ exports.requestBookingWallet = async (req, res, next) => {
     //how many nights to stay
     const msPerDay = 1000 * 60 * 60 * 24;
     const diffDays = Math.round(
-      (new Date(checkOut) - new Date(checkIn)) / msPerDay
+      (new Date(checkOut) - new Date(checkIn)) / msPerDay,
     );
 
     const totalPaymentExpected = fetchRoomPrice.price.totalPrice * diffDays;
@@ -553,14 +553,14 @@ exports.requestBookingWallet = async (req, res, next) => {
     let message = {
       notification: {
         title: "New Booking Request",
-        body: `A new booking request has been made for ${accomInfo.name}.\n\n Please log into your Triplaye account to view and manage the booking details.`,
+        body: `A new booking request has been made for ${accomInfo.name.en}.\n\n Please log into your Triplaye account to view and manage the booking details.`,
       },
     };
 
     let userMessage = {
       notification: {
         title: "Booking Request Received",
-        body: `We have received your booking request for ${accomInfo.name}. Our team is currently reviewing your request and will get back to you shortly with confirmation and further details.
+        body: `We have received your booking request for ${accomInfo.name.en}. Our team is currently reviewing your request and will get back to you shortly with confirmation and further details.
         
         Thank you for choosing us!`,
       },
@@ -595,7 +595,7 @@ exports.searchRooms = async (req, res, next) => {
       accommodation,
       roomId,
       checkIn,
-      checkOut
+      checkOut,
     ) {
       const existingBookings = await BookMdl.find({
         // accommodation: accommodation,
@@ -628,7 +628,7 @@ exports.searchRooms = async (req, res, next) => {
             combine(
               currentCombo,
               i + 1,
-              remainingGuests - room.subRoomType.number_of_guests
+              remainingGuests - room.subRoomType.number_of_guests,
             );
             currentCombo.pop();
           }
@@ -645,7 +645,7 @@ exports.searchRooms = async (req, res, next) => {
       checkIn,
       checkOut,
       totalGuests,
-      strictMatch = false
+      strictMatch = false,
     ) {
       // ✅ Get all available rooms, populate subRoomType + related models
       const allRooms = await RoomMdl.find({
@@ -676,7 +676,7 @@ exports.searchRooms = async (req, res, next) => {
       });
 
       console.log(
-        `Rooms for accommodation ${accommodation}: ${filteredRooms.length}`
+        `Rooms for accommodation ${accommodation}: ${filteredRooms.length}`,
       );
 
       // ✅ Filter out rooms with overlapping bookings
@@ -686,10 +686,10 @@ exports.searchRooms = async (req, res, next) => {
             accommodation,
             room._id,
             checkIn,
-            checkOut
+            checkOut,
           );
           return !isOverlapping ? room : null;
-        })
+        }),
       ).then((rooms) => rooms.filter(Boolean));
 
       console.log(
@@ -697,14 +697,14 @@ exports.searchRooms = async (req, res, next) => {
         availableRooms.map((room) => ({
           _id: room._id,
           guests: room.subRoomType?.number_of_guests,
-        }))
+        })),
       );
 
       // ✅ Single rooms that fit guests
       const individualRooms = availableRooms.filter((room) =>
         strictMatch
           ? room.subRoomType.number_of_guests === totalGuests
-          : room.subRoomType.number_of_guests >= totalGuests
+          : room.subRoomType.number_of_guests >= totalGuests,
       );
 
       // ✅ Combinations of rooms
@@ -715,12 +715,12 @@ exports.searchRooms = async (req, res, next) => {
         rooms: combo,
         totalCapacity: combo.reduce(
           (sum, room) => sum + room.subRoomType.number_of_guests,
-          0
+          0,
         ),
         totalPrice: combo.reduce(
           (sum, room) =>
             sum + (room.subRoomType.price_info?.original_price || 0),
-          0
+          0,
         ),
       }));
 
@@ -762,7 +762,7 @@ exports.searchRooms = async (req, res, next) => {
       checkInDate,
       checkOutDate,
       totalGuests,
-      false
+      false,
     );
 
     // Pagination logic
@@ -805,7 +805,7 @@ exports.searchNewRooms = async (req, res) => {
     function getSubRoomTypeCombinations(
       subRoomGroups,
       totalGuests,
-      maxRooms = 4
+      maxRooms = 4,
     ) {
       const results = [];
 
@@ -826,7 +826,7 @@ exports.searchNewRooms = async (req, res) => {
             combine(
               current,
               i, // allow reuse of same subRoomType
-              remainingGuests - capacity
+              remainingGuests - capacity,
             );
             current.pop();
           }
@@ -844,7 +844,7 @@ exports.searchNewRooms = async (req, res) => {
       accommodation,
       checkIn,
       checkOut,
-      totalGuests
+      totalGuests,
     ) {
       // -----------------------------------------------
       // Fetch rooms
@@ -871,7 +871,7 @@ exports.searchNewRooms = async (req, res) => {
       const accommodationRooms = rooms.filter(
         (room) =>
           room.subRoomType?.accommodation?._id.toString() ===
-          accommodation.toString()
+          accommodation.toString(),
       );
 
       // -----------------------------------------------
@@ -883,7 +883,7 @@ exports.searchNewRooms = async (req, res) => {
         const isOverlapping = await checkRoomBookingOverlap(
           room._id,
           checkIn,
-          checkOut
+          checkOut,
         );
 
         if (!isOverlapping) availableRooms.push(room);
@@ -935,7 +935,7 @@ exports.searchNewRooms = async (req, res) => {
       // -----------------------------------------------
       const combinations = getSubRoomTypeCombinations(
         subRoomGroups,
-        totalGuests
+        totalGuests,
       );
 
       const combinationOptions = combinations.map((combo) => ({
@@ -948,11 +948,11 @@ exports.searchNewRooms = async (req, res) => {
         availableRooms: Math.min(...combo.map((c) => c.availableRooms)),
         totalCapacity: combo.reduce(
           (sum, c) => sum + c.subRoomType.number_of_guests,
-          0
+          0,
         ),
         totalPrice: combo.reduce(
           (sum, c) => sum + (c.subRoomType.price_info?.room_price || 0),
-          0
+          0,
         ),
       }));
 
@@ -981,7 +981,7 @@ exports.searchNewRooms = async (req, res) => {
       accommodation,
       checkInDate,
       checkOutDate,
-      totalGuests
+      totalGuests,
     );
 
     res.json({
@@ -1131,7 +1131,7 @@ exports.rateRoom = async (req, res, next) => {
             {
               $addToSet: {rates: create_rate.id},
               updated_at: new Date(),
-            }
+            },
           );
 
           arr.push("ok", 201);
@@ -1180,7 +1180,7 @@ exports.update = (req, res, next) => {
                   null,
                   req.doc.accommodation.id,
                   "to",
-                  userEmail
+                  userEmail,
                 );
               }
               let totalBooking = await BookMdl.find({
@@ -1234,7 +1234,7 @@ exports.update = (req, res, next) => {
                       ? req.doc.created_by.client.uuid
                       : null,
                     serviceCharge,
-                    req.doc
+                    req.doc,
                   );
                   if (initiatePayment.status === "failed") {
                     return res.status(400).json({msg: initiatePayment.message});
@@ -1249,7 +1249,7 @@ exports.update = (req, res, next) => {
                     req.doc.accommodation,
                     req.doc.created_by.client,
                     req.doc,
-                    req._user.id
+                    req._user.id,
                   );
                   if (checkBrokerStatus.status === "bad") {
                     return res
@@ -1295,7 +1295,7 @@ exports.update = (req, res, next) => {
                       room_doc.status === status_update
                         ? console.log("room collection updated")
                         : console.log("room collection not updated");
-                    }
+                    },
                   );
                 });
                 email === undefined
@@ -1315,7 +1315,7 @@ exports.update = (req, res, next) => {
                       room_doc.status === status_update
                         ? console.log("room collection updated")
                         : console.log("room collection not updated");
-                    }
+                    },
                   );
                 });
                 /** notification */
@@ -1354,7 +1354,7 @@ exports.update = (req, res, next) => {
                 msg: "updated successfully",
                 status: 200,
               });
-            }
+            },
           )
         : res.status(401).json({
             msg: "unauthorized to access",
@@ -1427,7 +1427,7 @@ exports.cancelBooking = (req, res, next) => {
                   {status: "available", updated_at: new Date()},
                   (err, room_doc) => {
                     if (err) return next(err);
-                  }
+                  },
                 );
               }
               // console.log(req.doc.transaction);
@@ -1482,7 +1482,7 @@ exports.cancelBooking = (req, res, next) => {
                     hotelRestoredBalanace,
                     gojoProfit,
                     hotelTransaction,
-                    req.doc.accommodation.id
+                    req.doc.accommodation.id,
                   )
                     .then((data) => {
                       res.status(data[0]).json({msg: data[1]});
@@ -1494,7 +1494,7 @@ exports.cancelBooking = (req, res, next) => {
               } else {
                 res.status(200).json({msg: "cancellation succesful"});
               }
-            }
+            },
           );
         }
       } else {
@@ -1521,7 +1521,7 @@ exports.deleteBooking = (req, res, next) => {
             if (err) {
               return next(err);
             }
-          }
+          },
         );
       });
 
@@ -1554,7 +1554,7 @@ function checkUncheckedBooking(req, res, next) {
             const differenceInMilliseconds =
               now.getTime() - created_at_date.getTime();
             const hoursRemaining = Math.floor(
-              differenceInMilliseconds / (1000 * 60 * 60)
+              differenceInMilliseconds / (1000 * 60 * 60),
             );
 
             if (hoursRemaining > 24) {
@@ -1592,13 +1592,13 @@ function checkUncheckedBooking(req, res, next) {
                         r_name,
                         document.accommodation,
                         document,
-                        r_email
+                        r_email,
                       );
                     } else {
                       console.log(`Booking ${data._id} marked as expired.`);
                     }
                     callback(null); // continue to next
-                  }
+                  },
                 );
               }
 
@@ -1612,7 +1612,7 @@ function checkUncheckedBooking(req, res, next) {
             } else {
               //res.json(cats);
             }
-          }
+          },
         )
       : console.log("no pending booking");
   });
