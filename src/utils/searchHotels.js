@@ -12,7 +12,7 @@ async function checkRoomBookingOverlap(
   accommodation,
   roomId,
   checkIn,
-  checkOut
+  checkOut,
 ) {
   const existingBookings = await BookMdl.find({
     accommodation,
@@ -36,7 +36,7 @@ function getRoomCombinations(rooms, totalGuests, maxRooms = 4) {
     currentCombo,
     start,
     remainingGuests,
-    usedRoomIds = new Set()
+    usedRoomIds = new Set(),
   ) {
     if (remainingGuests <= 0 && currentCombo.length >= 2) {
       combinations.push([...currentCombo]);
@@ -56,7 +56,7 @@ function getRoomCombinations(rooms, totalGuests, maxRooms = 4) {
           currentCombo,
           i + 1,
           remainingGuests - guestCapacity,
-          usedRoomIds
+          usedRoomIds,
         );
         currentCombo.pop();
         usedRoomIds.delete(room._id.toString());
@@ -71,7 +71,7 @@ async function findAvailableAccommodations(
   city,
   checkIn,
   checkOut,
-  totalGuests
+  totalGuests,
 ) {
   // Convert city to ObjectId if it's stored as a reference
   let cityQuery = city;
@@ -92,16 +92,16 @@ async function findAvailableAccommodations(
     `All accommodations found for city ${city}: ${allAccommodations.length}`,
     allAccommodations.map((acc) => ({
       _id: acc._id,
-      name: acc.name,
+      name: acc.name.en,
       city: acc.address?.city,
-    }))
+    })),
   );
 
   // Process each accommodation to check for available rooms
   const results = await Promise.all(
     allAccommodations.map(async (accommodation) => {
       console.log(
-        `Processing accommodation ${accommodation.id}: ${accommodation.name}`
+        `Processing accommodation ${accommodation.id}: ${accommodation.name.en}`,
       );
       // Find subRoomType IDs for the accommodation
       const subRoomTypeIds = await subRoomType
@@ -110,7 +110,7 @@ async function findAvailableAccommodations(
       console.log("subRoomTypeIds", subRoomTypeIds);
       console.log(
         `SubRoomTypes for accommodation ${accommodation._id}: ${subRoomTypeIds.length}`,
-        subRoomTypeIds
+        subRoomTypeIds,
       );
 
       if (!subRoomTypeIds.length) {
@@ -132,7 +132,7 @@ async function findAvailableAccommodations(
           number_of_guests: room.subRoomType?.number_of_guests,
           status: room.status,
           is_hidden: room.is_hidden,
-        }))
+        })),
       );
 
       // Filter out rooms with overlapping bookings
@@ -146,10 +146,10 @@ async function findAvailableAccommodations(
             accommodation._id,
             room._id,
             checkIn,
-            checkOut
+            checkOut,
           );
           return !isOverlapping ? room : null;
-        })
+        }),
       ).then((rooms) => rooms.filter(Boolean));
 
       console.log(
@@ -158,12 +158,12 @@ async function findAvailableAccommodations(
           _id: room._id,
           room_number: room.room_number,
           number_of_guests: room.subRoomType?.number_of_guests,
-        }))
+        })),
       );
 
       // Include individual rooms that can accommodate totalGuests
       const individualRooms = availableRooms.filter(
-        (room) => (room.subRoomType?.number_of_guests || 0) >= totalGuests
+        (room) => (room.subRoomType?.number_of_guests || 0) >= totalGuests,
       );
 
       console.log(
@@ -172,7 +172,7 @@ async function findAvailableAccommodations(
           _id: room._id,
           room_number: room.room_number,
           number_of_guests: room.subRoomType?.number_of_guests,
-        }))
+        })),
       );
 
       // Generate combinations of rooms that can collectively accommodate totalGuests
@@ -184,14 +184,14 @@ async function findAvailableAccommodations(
           room_ids: combo.map((room) => room._id),
           total_guests: combo.reduce(
             (sum, room) => sum + (room.subRoomType?.number_of_guests || 0),
-            0
+            0,
           ),
           total_price: combo.reduce(
             (sum, room) =>
               sum + (room.subRoomType?.price_info?.room_price || 0),
-            0
+            0,
           ),
-        }))
+        })),
       );
 
       // If no suitable rooms or combinations, return null to exclude accommodation
@@ -232,18 +232,18 @@ async function findAvailableAccommodations(
           })),
           totalCapacity: combo.reduce(
             (sum, room) => sum + (room.subRoomType?.number_of_guests || 0),
-            0
+            0,
           ),
           totalPrice: combo.reduce(
             (sum, room) =>
               sum + (room.subRoomType?.price_info?.room_price || 0),
-            0
+            0,
           ),
         });
       });
 
       return result;
-    })
+    }),
   );
 
   return results.filter(Boolean);

@@ -35,7 +35,7 @@ module.exports = () => {
               for (const room of data.room) {
                 await RoomDal.updateOne(
                   {_id: room.id},
-                  {status: "occupied", updated_at: new Date()}
+                  {status: "occupied", updated_at: new Date()},
                 );
               }
 
@@ -48,7 +48,7 @@ module.exports = () => {
                   } else {
                     console.log(
                       "Booking status updated to checkedIn:",
-                      document
+                      document,
                     );
                     const createdBy = data.created_by;
                     const name = createdBy.has_account
@@ -62,7 +62,7 @@ module.exports = () => {
                       sendEmail(name, data.accommodation, data, email);
                     }
                   }
-                }
+                },
               );
             }
 
@@ -71,7 +71,7 @@ module.exports = () => {
               for (const room of data.room) {
                 await RoomDal.updateOne(
                   {_id: room.id},
-                  {status: "available", updated_at: new Date()}
+                  {status: "available", updated_at: new Date()},
                 );
               }
 
@@ -84,7 +84,7 @@ module.exports = () => {
                   } else {
                     console.log(
                       "Booking status updated to completed:",
-                      document
+                      document,
                     );
                     const createdBy = data.created_by;
                     const name = createdBy.has_account
@@ -102,25 +102,25 @@ module.exports = () => {
                         title: "Booking Completed",
                         body: `Dear ${name}!
 
-                          Thank you for choosing ${data.accommodation.name} for your recent stay. We hope you had a comfortable experience.
+                          Thank you for choosing ${data.accommodation.name.en} for your recent stay. We hope you had a comfortable experience.
 
                           We look forward to welcoming you back!
 
                            Sincerely,
-                           ${data.accommodation.name}
+                           ${data.accommodation.name.en}
                            Triplaye`,
                       },
                     };
 
                     sendMessage(message, userId, null, "to", email);
                   }
-                }
+                },
               );
             }
           }
 
           console.log("✅ Daily booking cron executed successfully");
-        }
+        },
       );
     } catch (err) {
       console.error("❌ Cron job failed:", err);

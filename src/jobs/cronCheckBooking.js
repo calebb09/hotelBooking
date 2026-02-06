@@ -46,7 +46,7 @@ module.exports = () => {
               },
               {
                 new: true,
-              }
+              },
             );
             if (updateHeldPayment) {
               const getBalance = await Wallet.findOne({
@@ -117,7 +117,7 @@ module.exports = () => {
           const userMessage = {
             notification: {
               title: "Booking Cancelled",
-              body: `Your booking at ${accomInfo.name} has been auto-cancelled due to ${messageBody}.`,
+              body: `Your booking at ${accomInfo.name.en} has been auto-cancelled due to ${messageBody}.`,
             },
           };
           sendMessage(userMessage, null, accomInfo.id, "to", userEmail);

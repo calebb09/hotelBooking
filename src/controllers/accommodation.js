@@ -35,7 +35,7 @@ exports.validateAccommodation = function validateAccommodation(
   req,
   res,
   next,
-  id
+  id,
 ) {
   // Manually validate if id is a valid MongoDB ObjectId
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -124,7 +124,7 @@ exports.sortyBy = async function (req, res) {
             skip: page,
             total: doc.total,
           });
-        }
+        },
       );
     } catch (e) {
       res.status(500).json({
@@ -175,7 +175,7 @@ exports.internationHotel = async (req, res, next) => {
           Authorization: `Bearer ${accessToken.token}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
     res.json(hotelsRes.data);
   } catch (error) {
@@ -209,7 +209,7 @@ exports.searchRooms = async (req, res) => {
           Authorization: `Bearer ${accessToken.token}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
     res.json(hotelsRes.data);
   } catch (error) {
@@ -341,12 +341,12 @@ exports.trending = (req, res, next) => {
               ...accommodation.toObject(), // convert mongoose doc to plain object
               bookingCount,
             };
-          })
+          }),
         );
 
         // ✅ Only include accommodations where bookingCount > 0
         const filtered = accommodationsWithCounts.filter(
-          (acc) => acc.bookingCount > 0
+          (acc) => acc.bookingCount > 0,
         );
 
         res.status(200).json({
@@ -355,7 +355,7 @@ exports.trending = (req, res, next) => {
           skip: page,
           total: doc.total,
         });
-      }
+      },
     );
   } catch (e) {
     res.status(500).json({
@@ -505,7 +505,7 @@ exports.subRoomType = async (req, res, next) => {
           rooms, // Attach full room details
           number_of_rooms: rooms.length, // Derived count
         };
-      })
+      }),
     );
 
     // Respond
@@ -598,7 +598,7 @@ exports.create = (req, res, next) => {
                           "this.IsAn/.ExampleS3cr3t",
                           {
                             algorithm: "HS256",
-                          }
+                          },
                         );
 
                         res.status(200).json({
@@ -614,7 +614,7 @@ exports.create = (req, res, next) => {
                           data: updated_user,
                         });
                       }
-                    }
+                    },
                   );
                 } else {
                   res
@@ -622,7 +622,7 @@ exports.create = (req, res, next) => {
                     .json({msg: "something went wrong", status: 400});
                 }
               });
-        }
+        },
       );
     } else {
       res.status(400).json({msg: response[0]});
@@ -700,7 +700,7 @@ exports.uploadSpreadSheet = async (req, res) => {
       if (!cityDoc || !lodgingDoc) {
         console.warn(
           `Skipping row due to missing city/lodging_type or userType:`,
-          row
+          row,
         );
         continue;
       }
@@ -892,7 +892,7 @@ exports.nearBy = async (req, res, next) => {
           skip: page,
           total: accommodations.docs.total,
         });
-      }
+      },
     );
   } catch (error) {
     console.error(error);
@@ -937,7 +937,7 @@ exports.where_to = async (req, res, next) => {
       city,
       checkInDate,
       checkOutDate,
-      totalGuests
+      totalGuests,
     );
 
     // Pagination logic
@@ -1012,7 +1012,7 @@ exports.uploadHouseRUle = (req, res, next) => {
           status: 400,
         });
       }
-    }
+    },
   );
 };
 exports.uploadPicture = (req, res, next) => {
@@ -1036,7 +1036,7 @@ exports.uploadPicture = (req, res, next) => {
         {$push: {picture: data.filename}},
         (err, image_doc) => {
           if (err) return next(err);
-        }
+        },
       );
       callback(null);
     },
@@ -1046,7 +1046,7 @@ exports.uploadPicture = (req, res, next) => {
       } else {
         return res.status(200).json({msg: "successfully updated", status: 200});
       }
-    }
+    },
   );
 };
 exports.removePicture = (req, res, next) => {
@@ -1076,7 +1076,7 @@ exports.removePicture = (req, res, next) => {
               break; // Exit the loop once the search term is found
             }
           }
-        }
+        },
       );
     }
   });
@@ -1099,11 +1099,11 @@ exports.reviewAccommodation = async (req, res, next) => {
     };
     // please post newly created accommodation on telegram
     await post2telegram(
-      req.doc.name,
+      req.doc.name.en,
       req.doc.description,
       config.TELEGRAM_CHANNEL,
       false,
-      req.doc.picture[0]
+      req.doc.picture[0],
     )
       .then((data) => {
         data[0] === 201 ? console.log(data[2]) : console.error(data[2]);
@@ -1112,7 +1112,7 @@ exports.reviewAccommodation = async (req, res, next) => {
   } else {
     update_query = Object.assign(
       {is_verified: false},
-      {updated_at: new Date()}
+      {updated_at: new Date()},
     );
     message = {
       notification: {
@@ -1153,7 +1153,7 @@ exports.addressUpdate = (req, res, next) => {
         msg: "updated successfully",
         status: 200,
       });
-    }
+    },
   );
 };
 exports.update = (req, res, next) => {
@@ -1171,7 +1171,7 @@ exports.update = (req, res, next) => {
             msg: "updated successfully",
             status: 200,
           });
-        }
+        },
       )
     : res.status(401).json({
         msg: "unauthorized to access",
@@ -1236,7 +1236,7 @@ async function checkMaxMinRoom(next) {
     for (const r of results) {
       await Property.findOneAndUpdate(
         {_id: r._id},
-        {$set: {min_max_price: [r.minPrice, r.maxPrice]}}
+        {$set: {min_max_price: [r.minPrice, r.maxPrice]}},
       );
     }
 
@@ -1282,7 +1282,7 @@ async function calculateRateAverage(next) {
     .then((data) => {
       data.map(async (items) => {
         await calculateAccommodationRateAverage(items.id).then((show) =>
-          console.log("show " + show)
+          console.log("show " + show),
         );
       });
     })

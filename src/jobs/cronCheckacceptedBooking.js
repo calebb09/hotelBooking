@@ -64,7 +64,7 @@ module.exports = () => {
           const userMessage = {
             notification: {
               title: "Booking Cancelled",
-              body: `Your booking request at ${accomInfo.name} has been auto-cancelled due to payment period expired.`,
+              body: `Your booking request at ${accomInfo.name.en} has been auto-cancelled due to payment period expired.`,
             },
           };
           sendMessage(userMessage, null, accomInfo.id, "to", userEmail);

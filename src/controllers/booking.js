@@ -1165,7 +1165,7 @@ exports.update = (req, res, next) => {
                 let message = {
                   notification: {
                     title: "Booking Cancelled",
-                    body: `A booking at ${req.doc.accommodation.name} has been ${body.status}.\n\n`,
+                    body: `A booking at ${req.doc.accommodation.name.en} has been ${body.status}.\n\n`,
                   },
                 };
                 //sendmessage to user
@@ -1343,7 +1343,7 @@ exports.update = (req, res, next) => {
                     title: "Booking Completed",
                     body: `Dear ${guest_name}!
                 
-                          Thank you for choosing ${data.accommodation.name} for your recent stay. We hope you had a comfortable experience.
+                          Thank you for choosing ${data.accommodation.name.en} for your recent stay. We hope you had a comfortable experience.
                           
                           We look forward to welcoming you back!`,
                   },
