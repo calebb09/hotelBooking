@@ -15,7 +15,7 @@ module.exports = () => {
         a.getDate() === b.getDate();
       BookingDal.getCollection(
         {
-          status: {$in: ["pending", "reserved", "checkedIn"]},
+          status: {$in: ["reserved", "checkedIn"]},
         },
         {},
         async (err, bookings) => {
