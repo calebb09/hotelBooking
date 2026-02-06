@@ -278,6 +278,7 @@ exports.directPay = async (req, res, next) => {
       checkIn: req.body.checkIn,
       checkOut: req.body.checkOut,
       accommodation: getAccommodation.subRoomType.accommodation.toString(),
+      currency_type: "USD",
       guests: {
         adult: req.body.adult,
         children: req.body.children,
@@ -415,6 +416,7 @@ exports.directPay = async (req, res, next) => {
             let addedTransactiondocument = Object.assign(create_query, {
               // transaction: output_response[2].id,
               is_paid: true,
+              status: "reserved",
             });
             console.log(addedTransactiondocument);
             let book_create_doc = await BookingMdl.create(
@@ -522,6 +524,7 @@ exports.localPay = async (req, res, next) => {
         checkIn: req.body.checkIn,
         checkOut: req.body.checkOut,
         accommodation: getAccommodation.subRoomType.accommodation.toString(),
+
         guests: {
           adult: req.body.adult,
           children: req.body.children,

@@ -22,6 +22,7 @@ var bookingSchema = new Schema(
       enum: [
         "pending",
         "accepted",
+        "failed",
         "reserved",
         "booked",
         "checkedIn",
@@ -65,7 +66,7 @@ var bookingSchema = new Schema(
 
     booking_checked_by: [{type: Schema.Types.ObjectId, ref: "user"}], // receptionist or owner
   },
-  {versionKey: false}
+  {versionKey: false},
 );
 bookingSchema.plugin(paginator);
 module.exports = mongoose.model("booking", bookingSchema);

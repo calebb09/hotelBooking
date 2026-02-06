@@ -21,7 +21,7 @@ exports = module.exports.directPay = async function (
   reason,
   roomInfo,
   discount,
-  bookingDetail
+  bookingDetail,
 ) {
   try {
     let output = [];
@@ -38,7 +38,7 @@ exports = module.exports.directPay = async function (
       const msPerDay = 1000 * 60 * 60 * 24;
       const diffDays = Math.round(
         (new Date(bookingDetail.checkOut) - new Date(bookingDetail.checkIn)) /
-          msPerDay
+          msPerDay,
       );
 
       // Total extra charges
@@ -108,35 +108,51 @@ exports = module.exports.directPay = async function (
               customer_phone: phone,
             },
             receipt_email: "info@triplaye.com",
-          })
+          }),
       )
       .then(
         async (charge) =>
           charge.status === "succeeded"
-            ? await ProfitMdl.create({
+            ? await TransactionDal.create({
                 user_information: {
                   user_type: userType,
                   user: userId,
                 },
                 amount: commissionPayment,
-                // transaction: transaction_doc.id,
-                reason: "Booking a room",
-                status: "available",
-              }).then(async (profit_data) => {
-                if (profit_data) {
-                  output.push("ok", profit_data, 201);
-                } else {
-                  output.push("bad", "profit not saved", 400);
-                }
+                transaction_status,
+                reason,
+                currency_type: "USD",
+                action_type: "deducted",
               })
-            : output.push("bad", "payment failed", 400)
+                .then(async (transaction_data) => {
+                  await ProfitMdl.create({
+                    user_information: {
+                      user_type: userType,
+                      user: userId,
+                    },
+                    amount: commissionPayment,
+                    transaction: transaction_data.id,
+                    reason: "Booking a room",
+                    status: "available",
+                  }).then(async (profit_data) => {
+                    if (profit_data) {
+                      output.push("ok", profit_data, 201);
+                    } else {
+                      output.push("bad", "profit not saved", 400);
+                    }
+                  });
+                })
+                .catch((error) => {
+                  output.push("bad", error.message, 500);
+                })
+            : output.push("bad", "payment failed", 400),
 
         // ((stripe_response = charge))
       )
 
       .catch((err) => {
         console.log("you");
-        console.log(err);
+        // console.log(err);
         output.push("bad", err, 500);
         //   res.status(err.raw.statusCode).json({
         //     error: true,
@@ -159,7 +175,7 @@ exports = module.exports.walletPay = async function (
   reason,
   discount,
   currency,
-  exchangeRate
+  exchangeRate,
 ) {
   // Function to modify the original_price property
   const modifyPriceInfo = (obj) => {
@@ -194,127 +210,128 @@ exports = module.exports.walletPay = async function (
         ? data[0].balance === 0
           ? output.push("bad", "balance insufficient", 400)
           : data[0].balance < payment_amount
-          ? output.push("bad", "balance insufficient", 400)
-          : await TransactionDal.create({
-              user_information: {
-                user_type: "user",
-                user: userInformation.id,
-                client: roomInfo[0].subRoomType.accommodation,
-              },
-              transaction_status: "payment",
-              amount: totalAmount,
-              action_type: "deducted",
-              uniqueId: generateUniqueAlphanumericString(10),
-              reason: reason,
-              currency_type: currency,
-            })
-              .then(async (tran_data) => {
-                let current_balance_1 = data[0].balance - totalAmount;
-                await BalanceDal.create({
-                  user_information: {
-                    user_type: "user",
-                    user: userInformation.id,
-                  },
-                  balance: current_balance_1,
-                  transaction: tran_data.id,
-                  uniqueId: tran_data.uniqueId,
-                  currency_type: currency,
-                  status: "available",
-                })
-                  .then(async (balance_data) => {
-                    /** transfer to accommodation or hotel */
-                    if (balance_data) {
-                      await TransactionDal.create({
-                        user_information: {
-                          user_type: "client",
-                          client: roomInfo[0].subRoomType.accommodation,
-                          user: userInformation.id,
-                        },
-                        transaction_status: "transfer",
-                        amount: roomPrice,
-                        currency_type: currency,
-                        uniqueId: balance_data.uniqueId,
-                        action_type: "added",
-                        reason:
-                          "room booking payment from " +
-                          userInformation.full_name,
-                      })
-                        .then(async (transaction_data) => {
-                          await BalanceDal.find({
-                            "user_information.client":
-                              roomInfo[0].subRoomType.accommodation,
-                            currency_type: currency,
-                          })
-                            .sort({_id: -1})
-                            .then(async (balance_data) => {
-                              let current_balance_2 = 0;
-                              if (balance_data.length === 0) {
-                                current_balance_2 = roomPrice;
-                              } else {
-                                current_balance_2 =
-                                  balance_data[0].balance + roomPrice;
-                              }
-                              await BalanceDal.create({
-                                user_information: {
-                                  user_type: "client",
-                                  client: roomInfo[0].subRoomType.accommodation,
-                                },
-                                balance: current_balance_2,
-                                transaction: transaction_data.id,
-                                uniqueId: transaction_data.uniqueId,
-                                currency_type: currency,
-                                status: "available",
-                              })
-                                .then(async (balance_document) => {
-                                  /** transfer the rest as a profit */
-                                  await ProfitMdl.create({
-                                    user_information: {
-                                      user_type: "user",
-                                      user: userInformation.id,
-                                    },
-                                    amount: commission,
-                                    uniqueId: balance_document.uniqueId,
-                                    transaction: transaction_data.id,
-                                    currency_type: currency,
-                                    reason: "Booking a room",
-                                    status: "available",
-                                  })
-                                    .then((profit_data) => {
-                                      if (profit_data) {
-                                        output.push(
-                                          "ok",
-                                          profit_data,
-                                          201,
-                                          tran_data
-                                        );
-                                      } else {
-                                        output.push(
-                                          "bad",
-                                          "profit not saved",
-                                          400
-                                        );
-                                      }
-                                    })
-                                    .catch((err) => {
-                                      output.push("bad", err, 500);
-                                    });
-                                })
-                                .catch((err) => {
-                                  output.push("bad", err, 500);
-                                });
-                            })
-                            .catch((error) => output.push("bad", error, 500));
-                        })
-                        .catch((err) => output.push("bad", err, 500));
-                    } else {
-                      output.push("bad", "balance not saved", 400);
-                    }
-                  })
-                  .catch((err) => {
-                    output.push("bad", err, 500);
-                  });
+            ? output.push("bad", "balance insufficient", 400)
+            : await TransactionDal.create({
+                user_information: {
+                  user_type: "user",
+                  user: userInformation.id,
+                  client: roomInfo[0].subRoomType.accommodation,
+                },
+                transaction_status: "payment",
+                amount: totalAmount,
+                action_type: "deducted",
+                uniqueId: generateUniqueAlphanumericString(10),
+                reason: reason,
+                currency_type: currency,
               })
-              .catch((err) => output.push("bad", err, 500))
+                .then(async (tran_data) => {
+                  let current_balance_1 = data[0].balance - totalAmount;
+                  await BalanceDal.create({
+                    user_information: {
+                      user_type: "user",
+                      user: userInformation.id,
+                    },
+                    balance: current_balance_1,
+                    transaction: tran_data.id,
+                    uniqueId: tran_data.uniqueId,
+                    currency_type: currency,
+                    status: "available",
+                  })
+                    .then(async (balance_data) => {
+                      /** transfer to accommodation or hotel */
+                      if (balance_data) {
+                        await TransactionDal.create({
+                          user_information: {
+                            user_type: "client",
+                            client: roomInfo[0].subRoomType.accommodation,
+                            user: userInformation.id,
+                          },
+                          transaction_status: "transfer",
+                          amount: roomPrice,
+                          currency_type: currency,
+                          uniqueId: balance_data.uniqueId,
+                          action_type: "added",
+                          reason:
+                            "room booking payment from " +
+                            userInformation.full_name,
+                        })
+                          .then(async (transaction_data) => {
+                            await BalanceDal.find({
+                              "user_information.client":
+                                roomInfo[0].subRoomType.accommodation,
+                              currency_type: currency,
+                            })
+                              .sort({_id: -1})
+                              .then(async (balance_data) => {
+                                let current_balance_2 = 0;
+                                if (balance_data.length === 0) {
+                                  current_balance_2 = roomPrice;
+                                } else {
+                                  current_balance_2 =
+                                    balance_data[0].balance + roomPrice;
+                                }
+                                await BalanceDal.create({
+                                  user_information: {
+                                    user_type: "client",
+                                    client:
+                                      roomInfo[0].subRoomType.accommodation,
+                                  },
+                                  balance: current_balance_2,
+                                  transaction: transaction_data.id,
+                                  uniqueId: transaction_data.uniqueId,
+                                  currency_type: currency,
+                                  status: "available",
+                                })
+                                  .then(async (balance_document) => {
+                                    /** transfer the rest as a profit */
+                                    await ProfitMdl.create({
+                                      user_information: {
+                                        user_type: "user",
+                                        user: userInformation.id,
+                                      },
+                                      amount: commission,
+                                      uniqueId: balance_document.uniqueId,
+                                      transaction: transaction_data.id,
+                                      currency_type: currency,
+                                      reason: "Booking a room",
+                                      status: "available",
+                                    })
+                                      .then((profit_data) => {
+                                        if (profit_data) {
+                                          output.push(
+                                            "ok",
+                                            profit_data,
+                                            201,
+                                            tran_data,
+                                          );
+                                        } else {
+                                          output.push(
+                                            "bad",
+                                            "profit not saved",
+                                            400,
+                                          );
+                                        }
+                                      })
+                                      .catch((err) => {
+                                        output.push("bad", err, 500);
+                                      });
+                                  })
+                                  .catch((err) => {
+                                    output.push("bad", err, 500);
+                                  });
+                              })
+                              .catch((error) => output.push("bad", error, 500));
+                          })
+                          .catch((err) => output.push("bad", err, 500));
+                      } else {
+                        output.push("bad", "balance not saved", 400);
+                      }
+                    })
+                    .catch((err) => {
+                      output.push("bad", err, 500);
+                    });
+                })
+                .catch((err) => output.push("bad", err, 500))
         : output.push("bad", "Balance insufficient", 404);
     })
     .catch((error) => output.push("bad", error, 500));
@@ -340,7 +357,7 @@ async function checkPending(req, res, next) {
             stripe_data.status === "succeeded"
               ? await BalanceDal.updateOne(
                   {_id: item.id},
-                  {status: stripe_data.status}
+                  {status: stripe_data.status},
                 )
                   .then(async (wallet_balance) => {
                     await TransactionDal.updateOne(
@@ -349,7 +366,7 @@ async function checkPending(req, res, next) {
                         wallet_recharge: {
                           status: stripe_data.status,
                         },
-                      }
+                      },
                     );
                   })
                   .catch((err) => {
@@ -357,7 +374,7 @@ async function checkPending(req, res, next) {
                   })
               : await BalanceDal.updateOne(
                   {_id: item.id},
-                  {status: stripe_data.status}
+                  {status: stripe_data.status},
                 )
                   .then(async (wallet_balance) => {
                     await TransactionDal.updateOne(
@@ -366,7 +383,7 @@ async function checkPending(req, res, next) {
                         wallet_recharge: {
                           status: stripe_data.status,
                         },
-                      }
+                      },
                     );
                   })
                   .catch((err) => {
@@ -522,7 +539,7 @@ function ifonlydiscountdirectPay(data, booking) {
     // Check if item.id matches any ID in withBreakFast
     if (booking.withBreakFast && booking.withBreakFast.length > 0) {
       const hasBreakfast = booking.withBreakFast.some(
-        (roomId) => roomId.toString() === item.id.toString()
+        (roomId) => roomId.toString() === item.id.toString(),
       );
       if (hasBreakfast && priceInfo.breakfast_price) {
         price += priceInfo.breakfast_price;
@@ -532,7 +549,7 @@ function ifonlydiscountdirectPay(data, booking) {
     // Check if item.id matches any ID in withRefundable
     if (booking.withRefundable && booking.withRefundable.length > 0) {
       const isRefundable = booking.withRefundable.some(
-        (roomId) => roomId.toString() === item.id.toString()
+        (roomId) => roomId.toString() === item.id.toString(),
       );
       if (isRefundable && priceInfo.refundable_price) {
         price += priceInfo.refundable_price;
@@ -560,7 +577,7 @@ function totalRoomPrice(data, booking) {
     // Check if item.id matches any ID in withBreakFast
     if (booking?.withBreakFast?.length > 0) {
       const hasBreakfast = booking.withBreakFast.some(
-        (roomId) => roomId.toString() === item.id.toString()
+        (roomId) => roomId.toString() === item.id.toString(),
       );
       if (hasBreakfast && priceInfo.breakfast_price) {
         price += priceInfo.breakfast_price;
@@ -570,7 +587,7 @@ function totalRoomPrice(data, booking) {
     // Check if item.id matches any ID in withRefundable
     if (booking?.withRefundable?.length > 0) {
       const isRefundable = booking.withRefundable.some(
-        (roomId) => roomId.toString() === item.id.toString()
+        (roomId) => roomId.toString() === item.id.toString(),
       );
       if (isRefundable && priceInfo.refundable_price) {
         price += priceInfo.refundable_price;
@@ -610,7 +627,7 @@ function generateUniqueAlphanumericString(length) {
     let string = "";
     for (let i = 0; i < length; i++) {
       string += characters.charAt(
-        Math.floor(Math.random() * characters.length)
+        Math.floor(Math.random() * characters.length),
       );
     }
 
