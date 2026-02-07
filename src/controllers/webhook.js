@@ -11,8 +11,9 @@ exports.recieveWebhook = async (req, res) => {
       eventData.reference,
       status,
       parseFloat(eventData.amount),
-      parseFloat(eventData.charge)
+      parseFloat(eventData.charge),
     );
+    console.log(runUpdate);
     return res.status(runUpdate.statusCode).json(runUpdate.message);
 
     // if (eventType === "charge.success" && status === "success" && txRef) {
