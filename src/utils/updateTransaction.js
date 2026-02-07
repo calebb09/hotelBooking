@@ -30,7 +30,7 @@ async function updateTransaction(
   reference,
   chapaStatus,
   amount,
-  charge
+  charge,
 ) {
   try {
     // define first
@@ -62,7 +62,7 @@ async function updateTransaction(
       return buildResponse(
         "failed",
         404,
-        `Already updated with the status ${store.status}`
+        `Already updated with the status ${store.status}`,
       );
     }
 
@@ -168,25 +168,25 @@ async function updateTransaction(
       }
       // Step 7: Transfer to hotel
       if (isRecharge === false) {
-        const hotelTransfer = await hotelTransaction(
-          totalRoomPrice(booking.room, booking) * rate,
-          "added",
-          booking.accommodation,
-          "transfer",
-          reference,
-          `${name} booked a room`
-        );
+        // const hotelTransfer = await hotelTransaction(
+        //   totalRoomPrice(booking.room, booking) * rate,
+        //   "added",
+        //   booking.accommodation,
+        //   "transfer",
+        //   reference,
+        //   `${name} booked a room`,
+        // );
 
-        if (hotelTransfer.status !== "success") {
-          return buildResponse(
-            "failed",
-            hotelTransfer.statusCode,
-            hotelTransfer.message
-          );
-        }
+        // if (hotelTransfer.status !== "success") {
+        //   return buildResponse(
+        //     "failed",
+        //     hotelTransfer.statusCode,
+        //     hotelTransfer.message,
+        //   );
+        // }
         // Step 8: Save profit
         const profitPayload = {
-          amount: totalCommission(booking.room, gojodiscoint) * rate,
+          amount,
           user_information: userInfo,
           currency_type: "ETB",
           transaction: saveTransaction.id,
@@ -200,7 +200,7 @@ async function updateTransaction(
           return buildResponse(
             "failed",
             400,
-            "Transaction profit was not saved"
+            "Transaction profit was not saved",
           );
         }
       }
@@ -210,20 +210,20 @@ async function updateTransaction(
       const updatedBooking = await Booking.findByIdAndUpdate(
         booking.id,
         {
-          status: "booked",
+          status: "reserved",
           transaction: isSuccess ? saveTransaction.id : null,
           is_paid: isSuccess ? true : false,
           tx_ref: reference,
           updated_at: new Date(),
         },
-        {new: true}
+        {new: true},
       );
 
       if (!updatedBooking) {
         return buildResponse(
           "bad",
           400,
-          "Error: your booking record was not saved"
+          "Error: your booking record was not saved",
         );
       }
     }
@@ -243,7 +243,7 @@ async function updateTransaction(
         },
         updated_at: new Date(),
       },
-      {new: true}
+      {new: true},
     );
 
     if (!updatedChapa) {
@@ -269,7 +269,7 @@ async function updateTransaction(
       "bad",
       500,
       error.response?.data || error.message,
-      error
+      error,
     );
   }
 }
