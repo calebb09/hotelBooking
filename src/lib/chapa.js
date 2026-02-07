@@ -5,7 +5,7 @@ const secretKey = config.CHAPA_HASH;
 const verifySignature = (req, res, next) => {
   try {
     const chapaSignature =
-      req.headers["Chapa-Signature"] || req.headers["x-chapa-signature"];
+      req.headers["chapa-Signature"] || req.headers["x-chapa-signature"];
     if (!chapaSignature) {
       console.log("🚫 Missing signature header");
       return res.status(401).json({message: "Unauthorized: Signature missing"});

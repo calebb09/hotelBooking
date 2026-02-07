@@ -13,7 +13,6 @@ exports.recieveWebhook = async (req, res) => {
       parseFloat(eventData.amount),
       parseFloat(eventData.charge),
     );
-    console.log(runUpdate);
     return res.status(runUpdate.statusCode).json(runUpdate.message);
 
     // if (eventType === "charge.success" && status === "success" && txRef) {
