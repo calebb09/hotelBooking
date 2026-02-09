@@ -1,4 +1,5 @@
 const https = require("https");
+// const http = require("http");
 const express = require("express");
 const morgan = require("morgan");
 const socketEvents = require("./src/lib/socketEvents");
@@ -66,6 +67,7 @@ else app.use(errorHandler.production);
 
 // HTTPS server
 const server = https.createServer(ssl, app);
+// const server = http.createServer(app);
 
 // Socket.io
 const io = require("socket.io")(server, {cors: {origin: "*"}});

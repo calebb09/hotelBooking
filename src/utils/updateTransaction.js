@@ -210,7 +210,7 @@ async function updateTransaction(
       const updatedBooking = await Booking.findByIdAndUpdate(
         booking.id,
         {
-          status: "reserved",
+          status: chapaStatus === "success" ? "reserved" : "failed",
           transaction: isSuccess ? saveTransaction.id : null,
           is_paid: isSuccess ? true : false,
           tx_ref: reference,
