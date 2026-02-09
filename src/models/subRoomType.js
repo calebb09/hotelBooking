@@ -22,6 +22,7 @@ const subRoomTypeSchema = new Schema(
     ],
     number_of_guests: {type: Number},
     price_info: {
+      timelydiscount: {type: String, default: "0%"}, // the discount for timely booking
       discount: {type: String, default: "0%"}, // the discount
       original_price: {type: Number},
       room_price: {type: Number}, //the hotel room price
@@ -29,6 +30,7 @@ const subRoomTypeSchema = new Schema(
       commissionAmount: {type: Number}, // in amount
       actual_price: {type: Number},
       discount_price: {type: Number},
+      // timely_discount_price: {type: Number},
       refundable_price: {type: Number},
       breakfast_price: {type: Number},
       has_discount: {type: Boolean, default: false},
@@ -49,7 +51,7 @@ const subRoomTypeSchema = new Schema(
     created_by: {type: Schema.Types.ObjectId, ref: "User"},
     updated_at: {type: Date},
   },
-  {versionKey: false}
+  {versionKey: false},
 );
 // add middleware to support pagination
 subRoomTypeSchema.plugin(paginator);

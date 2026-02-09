@@ -7,21 +7,25 @@ module.exports = () => {
       // feth all subroomtype and from that subroomtype if there is a discount change the original price
       const subRoomTypes = await subRoomTYpe.find({});
       for (const subRoom of subRoomTypes) {
-        if (subRoom.price_info.discount && subRoom.price_info.discount > 0) {
+        if (
+          subRoom.price_info.timelydiscount &&
+          parseInt(subRoom.price_info.timelydiscount) > 0
+        ) {
           const discountAmount =
-            (subRoom.price_info.original_price * subRoom.price_info.discount) /
+            (subRoom.price_info.original_price *
+              parseInt(subRoom.price_info.timelydiscount)) /
             100;
           const newPrice = subRoom.price_info.original_price - discountAmount;
           subRoom.price_info.discount_price = newPrice;
           await subRoom.save();
           console.log(
-            `Updated price for SubRoomType ${subRoom._id}: New Price = ${newPrice}`
+            `Updated price for SubRoomType ${subRoom._id}: New Price = ${newPrice}`,
           );
         } else {
           // if no discount, set current price to original price
 
           console.log(
-            `No discount for SubRoomType ${subRoom._id}: Price remains = ${subRoom.price_info.original_price}`
+            `No discount for SubRoomType ${subRoom._id}: Price remains = ${subRoom.price_info.original_price}`,
           );
         }
       }
