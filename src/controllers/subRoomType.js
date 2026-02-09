@@ -173,9 +173,16 @@ exports.create = function create(req, res, next) {
           );
           /** do math calculation  */
 
+          // create_body = Object.assign(body, {
+          //   accommodation: req._user.assigned_accommodation,
+          //   price_info,
+          // });
           create_body = Object.assign(body, {
             accommodation: req._user.assigned_accommodation,
-            price_info,
+            price_info: {
+              ...body.price_info, // keeps timelydiscount
+              ...price_info, // adds calculated fields
+            },
           });
           subRoomTypeDal.get(
             {
