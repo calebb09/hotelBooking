@@ -134,7 +134,7 @@ exports.create = function create(req, res, next) {
         });
         return;
       }
-
+      const timelydiscount = body?.timelydiscount || "0%";
       // check settings exists
       SettingsDal.getCollection({}, {}, async (err, GojoSettings) => {
         if (err) {
@@ -173,17 +173,20 @@ exports.create = function create(req, res, next) {
           );
           /** do math calculation  */
 
-          // create_body = Object.assign(body, {
-          //   accommodation: req._user.assigned_accommodation,
-          //   price_info,
-          // });
           create_body = Object.assign(body, {
             accommodation: req._user.assigned_accommodation,
             price_info: {
-              ...body.price_info, // keeps timelydiscount
-              ...price_info, // adds calculated fields
+              ...price_info,
+              timelydiscount, // ✅ now inside price_info
             },
           });
+          // create_body = Object.assign(body, {
+          //   accommodation: req._user.assigned_accommodation,
+          //   price_info: {
+          //     ...body.price_info, // keeps timelydiscount
+          //     ...price_info, // adds calculated fields
+          //   },
+          // });
           subRoomTypeDal.get(
             {
               $and: [
@@ -235,6 +238,7 @@ exports.update = async function update(req, res, next) {
   if (!hotelInfo) {
     return res.status(400).json({msg: "hotel not found"});
   }
+  const timelydiscount = body?.timelydiscount || "0%";
   SettingsDal.getCollection({}, {}, async (err, GojoSettings) => {
     if (err) {
       return next(err);
@@ -249,14 +253,19 @@ exports.update = async function update(req, res, next) {
     );
 
     body.updated_at = new Date();
-    // update_body = Object.assign(body, {price_info});
-    update_body = {
-      ...body,
+    update_body = Object.assign(body, {
       price_info: {
         ...price_info,
-        timelydiscount: body?.price_info?.timelydiscount || "0%",
+        timelydiscount, // ✅ inside price_info
       },
-    };
+    });
+    // update_body = {
+    //   ...body,
+    //   price_info: {
+    //     ...price_info,
+    //     timelydiscount: body?.price_info?.timelydiscount || "0%",
+    //   },
+    // };
     console.log(update_body);
     subRoomTypeDal.update(
       {
