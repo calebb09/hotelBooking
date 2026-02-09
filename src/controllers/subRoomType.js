@@ -33,7 +33,7 @@ exports.validatesubRoomType = function validatesubRoomType(req, res, next, id) {
           msg: "Catgeory _id " + id + " not found",
         });
       }
-    }
+    },
   );
 };
 exports.fetchAll = async (req, res, next) => {
@@ -83,7 +83,7 @@ exports.fetchRooms = function fetchEmployee(req, res, next) {
   RoomDal.getCollection(query, {}, (err, doc) => {
     if (err) return next(err);
     let availableRoomsCount = doc.filter(
-      (item) => item.status === "available"
+      (item) => item.status === "available",
     ).length;
     res.status(200).json({
       rooms: doc,
@@ -159,7 +159,7 @@ exports.create = function create(req, res, next) {
             GojoSettings[0].commission.user,
             body.discount,
             body.is_refundable,
-            req._user.assigned_accommodation
+            req._user.assigned_accommodation,
           );
 
           console.log(
@@ -168,8 +168,8 @@ exports.create = function create(req, res, next) {
               GojoSettings[0].commission.user,
               body.discount,
               body.is_refundable,
-              req._user.assigned_accommodation
-            )
+              req._user.assigned_accommodation,
+            ),
           );
           /** do math calculation  */
 
@@ -207,7 +207,7 @@ exports.create = function create(req, res, next) {
                 }
                 return res.status(200).json(doc);
               });
-            }
+            },
           );
         }
       });
@@ -238,11 +238,18 @@ exports.update = async function update(req, res, next) {
       body.discount,
       body.is_refundable ?? false,
       body.has_breakfast ?? false,
-      req.doc.accommodation
+      req.doc.accommodation,
     );
 
     body.updated_at = new Date();
-    update_body = Object.assign(body, {price_info});
+    // update_body = Object.assign(body, {price_info});
+    update_body = {
+      ...body,
+      price_info: {
+        ...price_info,
+        timelydiscount: body?.price_info?.timelydiscount || "0%",
+      },
+    };
     console.log(update_body);
     subRoomTypeDal.update(
       {
@@ -257,7 +264,7 @@ exports.update = async function update(req, res, next) {
           msg: "successful",
           doc,
         });
-      }
+      },
     );
   });
 };
@@ -283,7 +290,7 @@ exports.upload_picture = (req, res, next) => {
             {$push: {picture: data.filename}},
             (err, image_doc) => {
               if (err) return next(err);
-            }
+            },
           );
           callback(null);
         },
@@ -293,7 +300,7 @@ exports.upload_picture = (req, res, next) => {
           } else {
             res.status(200).json({msg: "successfully updated", status: 200});
           }
-        }
+        },
       );
     }
   } catch (error) {
@@ -330,7 +337,7 @@ exports.deletePicture = (req, res, next) => {
               break; // Exit the loop once the search term is found
             }
           }
-        }
+        },
       );
     }
   });
@@ -345,7 +352,7 @@ exports.delete = (req, res, next) => {
         return next(err);
       }
       res.json(doc);
-    }
+    },
   );
 };
 // Function to remove a picture from the accommodation model and the file system
@@ -391,7 +398,7 @@ function calculateRoomRateAverage(req, res, next) {
               if (err) {
                 console.log(err);
               }
-            }
+            },
           );
         }
       }
