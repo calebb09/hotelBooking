@@ -864,13 +864,14 @@ exports.nearBy = async (req, res, next) => {
     }
 
     const maxDistance = parseFloat(req.body.maxDistance) || 10000; // Default 10km in meters
-
+    const radiusKm = req.body.radius || 50;
+    const earthRadiusKm = 6378.1;
     // Find nearby accommodations
     AccommodationDal.getCollectionByPagination(
       {
         "address.location": {
           $geoWithin: {
-            $centerSphere: [[lng, lat], maxDistance / 6378137],
+            $centerSphere: [[lng, lat], radiusKm / earthRadiusKm],
           },
         },
         lodging_type: req.body.lodging_type
