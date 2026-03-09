@@ -869,12 +869,8 @@ exports.nearBy = async (req, res, next) => {
     AccommodationDal.getCollectionByPagination(
       {
         "address.location": {
-          $near: {
-            $geometry: {
-              type: "Point",
-              coordinates: [lng, lat],
-            },
-            $maxDistance: maxDistance,
+          $geoWithin: {
+            $centerSphere: [[lng, lat], maxDistance / 6378137],
           },
         },
         lodging_type: req.body.lodging_type
