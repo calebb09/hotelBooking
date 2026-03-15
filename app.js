@@ -23,7 +23,7 @@ fireadmin.initializeApp({
   credential: fireadmin.credential.cert(serviceAccount),
 });
 
-// DB Connection
+// MONGODB connection
 connectDB();
 
 // Express app
