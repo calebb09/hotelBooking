@@ -4,6 +4,7 @@ module.exports = () => {
   cron.schedule("0 0 7 * * *", async () => {
     // At 18:00 (6 PM) every day
     try {
+      // do recurring
       // feth all subroomtype and from that subroomtype if there is a discount change the original price
       const subRoomTypes = await subRoomTYpe.find({});
       for (const subRoom of subRoomTypes) {
