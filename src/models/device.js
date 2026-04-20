@@ -7,12 +7,12 @@ const Schema = mongoose.Schema;
 const deviceRouter = new Schema(
   {
     uuid: {type: String},
-    fcm_token: {type: String, unique: true},
+    fcm_token: {type: String},
     device_id: {type: String, unique: true},
     created_at: {type: Date, default: Date.now},
     updated_at: {type: Date},
   },
-  {versionKey: false}
+  {versionKey: false},
 );
 // add middleware to support pagination
 deviceRouter.plugin(paginator);

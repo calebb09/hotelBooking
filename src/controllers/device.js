@@ -25,7 +25,7 @@ exports.validateDevice = function validateDevice(req, res, next, id) {
           msg: "Device _id " + id + " not found",
         });
       }
-    }
+    },
   );
 };
 
@@ -63,63 +63,51 @@ exports.fetchOne = function fetchOne(req, res) {
 };
 
 exports.create = (req, res, next) => {
-  // req.checkBody("fcm_token").notEmpty().withMessage("FCM token is required");
-  // req.checkBody("device_id").notEmpty().withMessage("Device ID is required");
-  // var validationErrors = req.validationErrors();
-  // if (validationErrors) {
-  //   res.status(400);
-  //   res.json(validationErrors);
-  //   return;
-  // }
   let query = {
-    $and: [
-      {
-        uuid: req.user.uuid,
-      },
-      {
-        device_id: req.body.device_id,
-      },
-    ],
+    device_id: req.body.device_id,
   };
 
-  DeviceDal.get(query, (err, cat) => {
+  DeviceDal.getCollection(query, {}, (err, cat) => {
     if (err) {
       return next(err);
     }
-    Object.keys(cat).length === 0
-      ? DeviceDal.create(
-          {
-            fcm_token: req.body.fcm_token,
-            device_id: req.body.device_id,
-            uuid: req.user.uuid,
-          },
-          (err, ddoc) => {
-            if (err) {
-              return next(err);
-            }
-            res.status(200).json({
-              msg: "success",
-              status: 200,
-            });
+
+    if (cat.length === 0) {
+      DeviceDal.create(
+        {
+          fcm_token: req.body.fcm_token,
+          device_id: req.body.device_id,
+          uuid: req.user.uuid,
+        },
+        (err, ddoc) => {
+          if (err) {
+            return next(err);
           }
-        )
-      : DeviceDal.update(
-          {_id: cat._id},
-          {
-            device_id: req.body.device_id,
-            fcm_token: req.body.fcm_token,
-            updated_at: new Date(),
-          },
-          (err, ddoc) => {
-            if (err) {
-              return next(err);
-            }
-            res.status(200).json({
-              msg: "success",
-              status: 200,
-            });
+          res.status(200).json({
+            msg: "success",
+            status: 200,
+          });
+        },
+      );
+    } else {
+      DeviceDal.update(
+        {_id: cat[0]._id},
+        {
+          device_id: req.body.device_id,
+          fcm_token: req.body.fcm_token,
+          updated_at: new Date(),
+        },
+        (err, ddoc) => {
+          if (err) {
+            return next(err);
           }
-        );
+          res.status(200).json({
+            msg: "success",
+            status: 200,
+          });
+        },
+      );
+    }
   });
 };
 
@@ -136,7 +124,7 @@ exports.update = function update(req, res, next) {
         return next(err);
       }
       res.json(doc);
-    }
+    },
   );
 };
 
@@ -216,6 +204,6 @@ exports.deleteDevice = (req, res, next) => {
         return next(err);
       }
       res.json(doc);
-    }
+    },
   );
 };
