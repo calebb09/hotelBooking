@@ -13,7 +13,7 @@ exports = module.exports = async function (
   getUUID,
   accommodation,
   emailType,
-  emailAddress
+  emailAddress,
 ) {
   // ---------------- Handlebars helpers ----------------
   handlebars.registerHelper("newlineToBr", function (text) {
@@ -40,7 +40,7 @@ exports = module.exports = async function (
   try {
     const templatePath = path.resolve(
       __dirname,
-      "../../templates/views/email.handlebars"
+      "../../templates/views/email.handlebars",
     );
     const source = fs.readFileSync(templatePath, "utf8");
     const template = handlebars.compile(source);
@@ -111,6 +111,14 @@ exports = module.exports = async function (
         if (err) console.error(err);
       });
 
+      const messagePayload = {
+        token: data.fcm_token,
+        notification: {
+          title: message.notification.title,
+          body: message.notification.body,
+        },
+      };
+
       // ---------------- Firebase push notifications ----------------
       if (getUUID !== null) {
         DeviceDal.getCollection({uuid: getUUID}, {}, (err, devDOC) => {
@@ -119,11 +127,7 @@ exports = module.exports = async function (
             devDOC.forEach((data) => {
               fireadmin
                 .messaging()
-                .sendToDevice(
-                  data.fcm_token,
-                  message,
-                  Config.FIREBASE_NOTE_OPTS
-                )
+                .send(messagePayload)
                 .then(() => console.log("Notification sent successfully"))
                 .catch((error) => console.error(error));
             });
