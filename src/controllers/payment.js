@@ -30,7 +30,7 @@ const {
 const {model} = require("mongoose");
 let message = {};
 let email_lists = [];
-let output_response = [];
+
 const mogoose = require("mongoose");
 // let account_status = false;
 /** service charge based on the number of booking plus in the profit section find a way to handle the room price error */
@@ -238,6 +238,7 @@ exports.chapaBankLists = async (req, res) => {
 };
 exports.directPay = async (req, res, next) => {
   try {
+    let output_response = [];
     let body = req.body;
     let create_query = {};
     let errors = [];
