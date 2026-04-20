@@ -111,26 +111,35 @@ exports = module.exports = async function (
         if (err) console.error(err);
       });
 
-      const messagePayload = {
-        token: data.fcm_token,
-        notification: {
-          title: message.notification.title,
-          body: message.notification.body,
-        },
-      };
-
       // ---------------- Firebase push notifications ----------------
       if (getUUID !== null) {
-        DeviceDal.getCollection({uuid: getUUID}, {}, (err, devDOC) => {
+        DeviceDal.getCollection({uuid: getUUID}, {}, async (err, devDOC) => {
           if (err) return console.error(err);
           if (devDOC.length > 0) {
-            devDOC.forEach((data) => {
-              fireadmin
-                .messaging()
-                .send(messagePayload)
-                .then(() => console.log("Notification sent successfully"))
-                .catch((error) => console.error(error));
-            });
+            await Promise.all(
+              devDOC.map((data) =>
+                fireadmin.messaging().send({
+                  token: data.fcm_token,
+                  notification: {
+                    title: message.notification.title,
+                    body: message.notification.body,
+                  },
+                }),
+              ),
+            );
+            // devDOC.forEach((data) => {
+            //   fireadmin
+            //     .messaging()
+            //     .send({
+            //       token: data.fcm_token,
+            //       notification: {
+            //         title: message.notification.title,
+            //         body: message.notification.body,
+            //       },
+            //     })
+            //     .then(() => console.log("Notification sent successfully"))
+            //     .catch((error) => console.error(error));
+            // });
           }
         });
       }
