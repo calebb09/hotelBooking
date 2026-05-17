@@ -14,6 +14,7 @@ const Wallet = require("../models/wallet");
 const hotelTransaction = require("../utils/hotelTransaction");
 const Client = require("../models/client");
 const Services = require("../models/service");
+const SubRoomType = require("../models/subRoomType");
 //build output response
 function buildResponse(status, statusCode, message, error = null) {
   const response = {status, statusCode, message};
@@ -71,7 +72,16 @@ async function updateTransaction(
       tx_ref: txtRef,
       is_paid: false,
       status: "pending",
-    }).populate({path: "room", model: Room});
+    }).populate({
+      path: "room",
+      model: Room,
+      populate: [
+        {
+          path: "subRoomType",
+          model: SubRoomType,
+        },
+      ],
+    });
 
     if (!isRecharge) {
       if (!booking) {
