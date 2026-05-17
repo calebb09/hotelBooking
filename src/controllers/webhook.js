@@ -6,7 +6,7 @@ exports.recieveWebhook = async (req, res) => {
     const eventType = eventData.event;
     const txRef = eventData.tx_ref;
     const status = eventData.status;
-    console.log(status);
+    console.log(eventData);
     const runUpdate = await updateTransaction(
       txRef,
       eventData.reference,
