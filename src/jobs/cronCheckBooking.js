@@ -98,54 +98,7 @@ module.exports = () => {
             console.log("No booking to verify or already processed.");
           }
 
-          // console.log(booking);
-          // if (booking.is_paid_via_wallet === true) {
-          //   const updateHeldPayment = await HeldPayment.findOneAndUpdate(
-          //     {
-          //       tx_ref: booking.tx_ref,
-          //     },
-          //     {
-          //       transaction_status: "reversedBack",
-          //       updated_at: new Date(),
-          //     },
-          //     {
-          //       new: true,
-          //     },
-          //   );
-          //   if (updateHeldPayment) {
-          //     const getBalance = await Wallet.findOne({
-          //       uniqueId: booking.tx_ref,
-          //     });
-          //     const heldPay = await HeldPayment.findOne({
-          //       tx_ref: booking.tx_ref,
-          //     });
-          //     // const getTransaction = await Transaction.findOne({
-          //     //   uniqueId: booking.tx_ref,
-          //     // });
-
-          //     // it is time to createTransaction
-          //     let createTransaction = new Transaction({
-          //       amount: heldPay.money.totalPayment,
-          //       user_information: {
-          //         user_type: "user",
-          //         user: getBalance.user_information.user,
-          //       },
-          //       transaction_status: "returnedBack",
-          //       reason: "Fund returned back due to hotel unresponsive",
-          //       currency_type: getBalance.currency_type,
-          //       action_type: "added",
-          //     });
-          //     createTransaction.save();
-          //     // save balance
-          //     let saveBalance = new Wallet({
-          //       balance: getBalance.balance + heldPay.money.totalPayment,
-          //       currency_type: getBalance.currency_type,
-          //       user_information: getBalance.user_information,
-          //       transaction: createTransaction.id,
-          //     });
-          //     saveBalance.save();
-          //   }
-          // }
+          
           // Notify accommodation managers about the cancellations
           const accomInfo = await Property.findOne({
             _id: booking.accommodation,
