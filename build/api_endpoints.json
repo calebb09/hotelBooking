@@ -1,0 +1,566 @@
+[
+  {
+    "method": "GET",
+    "path": "/",
+    "file": "src/routes/v1/accommodation.js",
+    "line": 291
+  },
+  {
+    "method": "GET",
+    "path": "/unowned",
+    "file": "src/routes/v1/accommodation.js",
+    "line": 308
+  },
+  {
+    "method": "GET",
+    "path": "/sort",
+    "file": "src/routes/v1/accommodation.js",
+    "line": 309
+  },
+  {
+    "method": "GET",
+    "path": "/international/searchRoom",
+    "file": "src/routes/v1/accommodation.js",
+    "line": 450
+  },
+  {
+    "method": "GET",
+    "path": "/all",
+    "file": "src/routes/v1/accommodation.js",
+    "line": 456
+  },
+  {
+    "method": "GET",
+    "path": "/top_unique",
+    "file": "src/routes/v1/accommodation.js",
+    "line": 494
+  },
+  {
+    "method": "GET",
+    "path": "/trending",
+    "file": "src/routes/v1/accommodation.js",
+    "line": 511
+  },
+  {
+    "method": "GET",
+    "path": "/:id/rooms",
+    "file": "src/routes/v1/accommodation.js",
+    "line": 542
+  },
+  {
+    "method": "GET",
+    "path": "/:id/subRoomType",
+    "file": "src/routes/v1/accommodation.js",
+    "line": 543
+  },
+  {
+    "method": "GET",
+    "path": "/:id",
+    "file": "src/routes/v1/accommodation.js",
+    "line": 574
+  },
+  {
+    "method": "POST",
+    "path": "/filter",
+    "file": "src/routes/v1/accommodation.js",
+    "line": 672
+  },
+  {
+    "method": "POST",
+    "path": "/nearBy",
+    "file": "src/routes/v1/accommodation.js",
+    "line": 695
+  },
+  {
+    "method": "POST",
+    "path": "/filter/where_to",
+    "file": "src/routes/v1/accommodation.js",
+    "line": 718
+  },
+  {
+    "method": "GET",
+    "path": "/",
+    "file": "src/routes/v1/accommodationType.js",
+    "line": 95
+  },
+  {
+    "method": "GET",
+    "path": "/:id/accommodation",
+    "file": "src/routes/v1/accommodationType.js",
+    "line": 118
+  },
+  {
+    "method": "GET",
+    "path": "/:id",
+    "file": "src/routes/v1/accommodationType.js",
+    "line": 141
+  },
+  {
+    "method": "POST",
+    "path": "/",
+    "file": "src/routes/v1/accommodationType.js",
+    "line": 175
+  },
+  {
+    "method": "PUT",
+    "path": "/:id",
+    "file": "src/routes/v1/accommodationType.js",
+    "line": 216
+  },
+  {
+    "method": "GET",
+    "path": "/",
+    "file": "src/routes/v1/bank.js",
+    "line": 128
+  },
+  {
+    "method": "GET",
+    "path": "/myAccount",
+    "file": "src/routes/v1/bank.js",
+    "line": 170
+  },
+  {
+    "method": "GET",
+    "path": "/:id",
+    "file": "src/routes/v1/bank.js",
+    "line": 195
+  },
+  {
+    "method": "POST",
+    "path": "/",
+    "file": "src/routes/v1/bank.js",
+    "line": 229
+  },
+  {
+    "method": "POST",
+    "path": "/create",
+    "file": "src/routes/v1/bank.js",
+    "line": 263
+  },
+  {
+    "method": "PUT",
+    "path": "/:id",
+    "file": "src/routes/v1/bank.js",
+    "line": 380
+  },
+  {
+    "method": "DELETE",
+    "path": "/user/:id",
+    "file": "src/routes/v1/bank.js",
+    "line": 413
+  },
+  {
+    "method": "DELETE",
+    "path": "/:id",
+    "file": "src/routes/v1/bank.js",
+    "line": 446
+  },
+  {
+    "method": "GET",
+    "path": "/",
+    "file": "src/routes/v1/city.js",
+    "line": 77
+  },
+  {
+    "method": "GET",
+    "path": "/trending",
+    "file": "src/routes/v1/city.js",
+    "line": 94
+  },
+  {
+    "method": "GET",
+    "path": "/:id/properties",
+    "file": "src/routes/v1/city.js",
+    "line": 117
+  },
+  {
+    "method": "GET",
+    "path": "/:id",
+    "file": "src/routes/v1/city.js",
+    "line": 140
+  },
+  {
+    "method": "POST",
+    "path": "/",
+    "file": "src/routes/v1/city.js",
+    "line": 174
+  },
+  {
+    "method": "PUT",
+    "path": "/:id",
+    "file": "src/routes/v1/city.js",
+    "line": 215
+  },
+  {
+    "method": "GET",
+    "path": "/profile",
+    "file": "src/routes/v1/client.js",
+    "line": 150
+  },
+  {
+    "method": "GET",
+    "path": "/booking_history",
+    "file": "src/routes/v1/client.js",
+    "line": 167
+  },
+  {
+    "method": "GET",
+    "path": "/verify",
+    "file": "src/routes/v1/client.js",
+    "line": 190
+  },
+  {
+    "method": "POST",
+    "path": "/signIn",
+    "file": "src/routes/v1/client.js",
+    "line": 249
+  },
+  {
+    "method": "POST",
+    "path": "/create",
+    "file": "src/routes/v1/client.js",
+    "line": 272
+  },
+  {
+    "method": "POST",
+    "path": "/save_location",
+    "file": "src/routes/v1/client.js",
+    "line": 295
+  },
+  {
+    "method": "PUT",
+    "path": "/:id",
+    "file": "src/routes/v1/client.js",
+    "line": 336
+  },
+  {
+    "method": "POST",
+    "path": "/",
+    "file": "src/routes/v1/device.js",
+    "line": 226
+  },
+  {
+    "method": "GET",
+    "path": "/",
+    "file": "src/routes/v1/facility.js",
+    "line": 94
+  },
+  {
+    "method": "GET",
+    "path": "/lists",
+    "file": "src/routes/v1/facility.js",
+    "line": 111
+  },
+  {
+    "method": "GET",
+    "path": "/:id",
+    "file": "src/routes/v1/facility.js",
+    "line": 134
+  },
+  {
+    "method": "POST",
+    "path": "/",
+    "file": "src/routes/v1/facility.js",
+    "line": 168
+  },
+  {
+    "method": "GET",
+    "path": "/:id",
+    "file": "src/routes/v1/notification.js",
+    "line": 272
+  },
+  {
+    "method": "PUT",
+    "path": "/mark_all_as_read",
+    "file": "src/routes/v1/notification.js",
+    "line": 337
+  },
+  {
+    "method": "PUT",
+    "path": "/:id/mark_as_read",
+    "file": "src/routes/v1/notification.js",
+    "line": 370
+  },
+  {
+    "method": "PUT",
+    "path": "/:id/mark_as_unread",
+    "file": "src/routes/v1/notification.js",
+    "line": 403
+  },
+  {
+    "method": "GET",
+    "path": "/:id",
+    "file": "src/routes/v1/package.js",
+    "line": 137
+  },
+  {
+    "method": "POST",
+    "path": "/",
+    "file": "src/routes/v1/package.js",
+    "line": 171
+  },
+  {
+    "method": "GET",
+    "path": "/",
+    "file": "src/routes/v1/room.js",
+    "line": 105
+  },
+  {
+    "method": "GET",
+    "path": "/:id",
+    "file": "src/routes/v1/room.js",
+    "line": 153
+  },
+  {
+    "method": "GET",
+    "path": "/",
+    "file": "src/routes/v1/room_type.js",
+    "line": 160
+  },
+  {
+    "method": "GET",
+    "path": "/:id/rooms/",
+    "file": "src/routes/v1/room_type.js",
+    "line": 204
+  },
+  {
+    "method": "GET",
+    "path": "/:id",
+    "file": "src/routes/v1/room_type.js",
+    "line": 228
+  },
+  {
+    "method": "POST",
+    "path": "/",
+    "file": "src/routes/v1/room_type.js",
+    "line": 253
+  },
+  {
+    "method": "PUT",
+    "path": "/:id",
+    "file": "src/routes/v1/room_type.js",
+    "line": 294
+  },
+  {
+    "method": "GET",
+    "path": "/",
+    "file": "src/routes/v1/service.js",
+    "line": 113
+  },
+  {
+    "method": "GET",
+    "path": "/:id",
+    "file": "src/routes/v1/service.js",
+    "line": 144
+  },
+  {
+    "method": "GET",
+    "path": "/",
+    "file": "src/routes/v1/settings.js",
+    "line": 73
+  },
+  {
+    "method": "GET",
+    "path": "/:id/rooms/",
+    "file": "src/routes/v1/subRoomType.js",
+    "line": 296
+  },
+  {
+    "method": "GET",
+    "path": "/:id",
+    "file": "src/routes/v1/subRoomType.js",
+    "line": 319
+  },
+  {
+    "method": "GET",
+    "path": "/",
+    "file": "src/routes/v1/user.js",
+    "line": 123
+  },
+  {
+    "method": "GET",
+    "path": "/all",
+    "file": "src/routes/v1/user.js",
+    "line": 142
+  },
+  {
+    "method": "GET",
+    "path": "/customers/logout",
+    "file": "src/routes/v1/user.js",
+    "line": 231
+  },
+  {
+    "method": "GET",
+    "path": "/:id",
+    "file": "src/routes/v1/user.js",
+    "line": 256
+  },
+  {
+    "method": "POST",
+    "path": "/Users",
+    "file": "src/routes/v1/user.js",
+    "line": 291
+  },
+  {
+    "method": "POST",
+    "path": "/login",
+    "file": "src/routes/v1/user.js",
+    "line": 323
+  },
+  {
+    "method": "POST",
+    "path": "/register",
+    "file": "src/routes/v1/user.js",
+    "line": 434
+  },
+  {
+    "method": "POST",
+    "path": "/create_system_admin",
+    "file": "src/routes/v1/user.js",
+    "line": 487
+  },
+  {
+    "method": "POST",
+    "path": "/forgot_password",
+    "file": "src/routes/v1/user.js",
+    "line": 583
+  },
+  {
+    "method": "PUT",
+    "path": "/activate/account",
+    "file": "src/routes/v1/user.js",
+    "line": 635
+  },
+  {
+    "method": "PUT",
+    "path": "/password/update",
+    "file": "src/routes/v1/user.js",
+    "line": 682
+  },
+  {
+    "method": "GET",
+    "path": "/history",
+    "file": "src/routes/v2/booking.js",
+    "line": 237
+  },
+  {
+    "method": "GET",
+    "path": "/txtId/:txtId",
+    "file": "src/routes/v2/booking.js",
+    "line": 270
+  },
+  {
+    "method": "GET",
+    "path": "/:id",
+    "file": "src/routes/v2/booking.js",
+    "line": 303
+  },
+  {
+    "method": "POST",
+    "path": "/request",
+    "file": "src/routes/v2/booking.js",
+    "line": 376
+  },
+  {
+    "method": "POST",
+    "path": "/old-filter",
+    "file": "src/routes/v2/booking.js",
+    "line": 456
+  },
+  {
+    "method": "POST",
+    "path": "/filter",
+    "file": "src/routes/v2/booking.js",
+    "line": 457
+  },
+  {
+    "method": "POST",
+    "path": "/:id/rate",
+    "file": "src/routes/v2/booking.js",
+    "line": 496
+  },
+  {
+    "method": "PUT",
+    "path": "/:id/cancel",
+    "file": "src/routes/v2/booking.js",
+    "line": 582
+  },
+  {
+    "method": "GET",
+    "path": "/:id",
+    "file": "src/routes/v2/profit.js",
+    "line": 157
+  },
+  {
+    "method": "GET",
+    "path": "/user/view/:currency",
+    "file": "src/routes/v2/wallet.js",
+    "line": 133
+  },
+  {
+    "method": "GET",
+    "path": "/user/:id",
+    "file": "src/routes/v2/wallet.js",
+    "line": 305
+  },
+  {
+    "method": "GET",
+    "path": "/verify_payment/:chapaId",
+    "file": "src/routes/v3/payment.js",
+    "line": 346
+  },
+  {
+    "method": "GET",
+    "path": "/user/verify/chapa/:txtnID",
+    "file": "src/routes/v3/payment.js",
+    "line": 347
+  },
+  {
+    "method": "GET",
+    "path": "/chapa/bank_lists",
+    "file": "src/routes/v3/payment.js",
+    "line": 372
+  },
+  {
+    "method": "POST",
+    "path": "/booking_request/:txtId",
+    "file": "src/routes/v3/payment.js",
+    "line": 633
+  },
+  {
+    "method": "POST",
+    "path": "/user/pay_with_chapa",
+    "file": "src/routes/v3/payment.js",
+    "line": 634
+  },
+  {
+    "method": "POST",
+    "path": "/user/chapa/directPay",
+    "file": "src/routes/v3/payment.js",
+    "line": 635
+  },
+  {
+    "method": "POST",
+    "path": "/user/chapa/bankTransfer",
+    "file": "src/routes/v3/payment.js",
+    "line": 636
+  },
+  {
+    "method": "POST",
+    "path": "/chapa/bank_lists/search",
+    "file": "src/routes/v3/payment.js",
+    "line": 669
+  },
+  {
+    "method": "POST",
+    "path": "/refund",
+    "file": "src/routes/v3/payment.js",
+    "line": 670
+  },
+  {
+    "method": "POST",
+    "path": "/webhook",
+    "file": "src/routes/v3/webhook.js",
+    "line": 5
+  }
+]
