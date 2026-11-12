@@ -1,0 +1,36 @@
+"use strict";
+const express = require("express");
+const router = express();
+const AccommodationRouter = require("./accommodation");
+const AccommodationTRouter = require("./accommodationType");
+const BankRouter = require("./bank");
+const RoomTypeRouter = require("./room_type");
+const CityRouter = require("./city");
+const ClientRouter = require("./client");
+const DeviceRouter = require("./device");
+const FacilityRouter = require("./facility");
+const NotifiRouter = require("./notification");
+const PackageRouter = require("./package");
+const RoomRouter = require("./room");
+const ServiceCharge = require("./service");
+const SettingRouter = require("./settings");
+const SubRoomTypeRouter = require("./subRoomType");
+const UserRouter = require("./user");
+
+router.use("/api/accommodation", AccommodationRouter);
+router.use("/api/accommodation_type", AccommodationTRouter);
+router.use("/api/banks", BankRouter);
+router.use("/api/city", CityRouter);
+router.use("/api/client", ClientRouter);
+router.use("/api/device", DeviceRouter);
+router.use("/api/facility", FacilityRouter);
+router.use("/api/notification", NotifiRouter);
+router.use("/api/package", PackageRouter);
+router.use("/api/room", RoomRouter);
+router.use("/api/room_type", RoomTypeRouter);
+router.use("/api/service_charge", ServiceCharge);
+router.use("/api/setting", SettingRouter);
+router.use("/api/sub_room_type", SubRoomTypeRouter);
+router.use("/api/user", UserRouter);
+
+module.exports = router;

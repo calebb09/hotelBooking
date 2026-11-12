@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f6f8;
+    }
+
+    .main-body {
+      background-color: #ffffff;
+      width: 100%;
+      max-width: 600px;
+      margin: 20px auto;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .header-container {
+      background-color: #372F2B;
+      color: #CCC;
+      padding: 5px;
+      text-align: center;
+    }
+
+    .header-container img {
+      max-width: 140px;
+      margin-bottom: 10px;
+    }
+
+    .confirmation-section {
+      padding: 10px;
+    }
+
+    .confirmation-text {
+      margin: 20px 0;
+      font-size: 20px;
+      font-weight: bold;
+      color: #111827;
+    }
+
+    .confirmation-list {
+      list-style: none;
+      margin: 25px 0;
+      padding: 0;
+    }
+
+    .confirmation-list li {
+      position: relative;
+      padding-left: 26px;
+      margin-bottom: 12px;
+      font-size: 15px;
+      color: #374151;
+    }
+
+    .confirmation-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 3px;
+      width: 16px;
+      height: 16px;
+      background-image: url("https://epseth.com/gojo/booking/assets/check-mark.png");
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+
+    h3 {
+      margin-top: 30px;
+      margin-bottom: 5px;
+      color: #1D4ED8;
+    }
+
+    p {
+      margin: 6px 0;
+      color: #374151;
+      font-size: 14px;
+    }
+
+    ul {
+      margin: 5px 0 15px 20px;
+      padding: 0;
+    }
+
+    .details-container {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .details-container th,
+    .details-container td {
+      padding: 12px;
+      border: 1px solid #e5e7eb;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    .details-container th {
+      background-color: #f9fafb;
+      width: 40%;
+      color: #111827;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      margin: 25px auto 0;
+      background-color: #F6B015;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+
+    .footer {
+      background-color: #f4f6f8;
+      text-align: center;
+      padding: 14px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="main-body">
+
+    <!-- Header -->
+    <div class="header-container">
+      <img src="https://triplaye.com/assets/icons/triplay_logo.png" alt="Triplaye" />
+      <h2>Booking Confirmed</h2>
+    </div>
+
+    <!-- Body -->
+    <div class="confirmation-section">
+      <center>
+        <img src="https://epseth.com/gojo/booking/assets/check.png" width="20" />
+      </center>
+
+      <p class="confirmation-text">
+        Thank you {{user_name}}, your booking with {{hotel_name}} is confirmed 🎉
+      </p>
+
+      <ul class="confirmation-list">
+        <li>{{hotel_name}} is expecting you on {{checkIn}}</li>
+        <li>Your stay has been successfully reserved via Triplaye</li>
+      </ul>
+
+      <h3>{{hotel_name}}</h3>
+      <p>{{hotel_address}}</p>
+
+      <p><strong>Phone:</strong></p>
+      <ul>
+        {{#each hotel_phone}}
+        <li>{{this}}</li>
+        {{/each}}
+      </ul>
+
+      <p><strong>Email:</strong></p>
+      <ul>
+        {{#each hote_email}}
+        <li>{{this}}</li>
+        {{/each}}
+      </ul>
+
+      <!-- Reservation Details -->
+      <table class="details-container">
+        <tr>
+          <th>Your Reservation</th>
+          <td>{{reservation_info}}, {{total_room_booked}} room(s)</td>
+        </tr>
+        <tr>
+          <th>Check-in</th>
+          <td>{{checkIn}}</td>
+        </tr>
+        <tr>
+          <th>Check-out</th>
+          <td>{{checkOut}}</td>
+        </tr>
+
+        {{#if payment_detail}}
+        <tr>
+          <th>Reference</th>
+          <td>{{uppercase payment_detail.uniqueId}}</td>
+        </tr>
+        {{/if}}
+      </table>
+
+      <!-- Optional CTA -->
+      {{!--
+      <center>
+        <a href="{{manage_booking_link}}" class="btn">Manage Your Booking</a>
+      </center>
+      --}}
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    &copy; {{copyRightYear}} Triplaye.com. All rights reserved.
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,16 @@
+stages:
+  - deploy
+
+deploy_production:
+  stage: deploy
+  image: node:20
+  only:
+    - main # change if you deploy from another branch
+  script:
+    - echo "🚀 Deploying to server..."
+    - apt-get update -y && apt-get install -y openssh-client
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -H 138.199.225.171 >> ~/.ssh/known_hosts
+    - ssh root@138.199.225.171 "cd /home/telepostTest && ./deploy.sh"

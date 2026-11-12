@@ -1,0 +1,195 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+        @import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap");
+
+        body {
+            margin-left: 18%;
+            margin-right: 18%;
+            background-color: rgba(0, 0, 0, 0.05);
+            margin-top: 0;
+            padding-top: 0;
+
+        }
+        .main_body {
+            background-color: white !important;
+            padding-bottom: 2px;
+            border-radius: 0px 0px 15px 15px;
+        }
+        .header-container {
+        background-color: #1D4ED8;
+        color: white;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+        }
+        .left-text {
+        text-align: left;
+        font-size: 30px;
+        font-family: Lato;
+        }
+        .right-text {
+        text-align: right;
+        font-family: Lato;
+        font-size: 12px;
+        }
+        .confirmation-section {
+        padding: 20px;
+        padding-left: 40px;
+        color: #333;
+        font-family: Poppins;
+        }
+        .confirmation-text {
+        display: flex;
+        align-items: center;
+        padding-left: 5px;
+        margin-bottom: 30px;
+        font-weight: 600;
+        }
+        .confirmation-text img {
+        margin-right: 10px;
+        }
+        .confirmation-list {
+        list-style: none;
+        padding-left: 0;
+        margin-left: 0px;
+        margin-bottom: 20px;
+        font-family: Poppins;
+        }
+        .confirmation-list li {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        }
+        .confirmation-list li img {
+        margin-right: 10px;
+        padding-left: 35px;
+        }
+        #button_1 {
+        background-color: #1D4ED8;
+        color: white;
+        border-radius: 6px;
+        height: 40px;
+        margin-left: 20px;
+        margin-right: 15px;
+        padding-right: 80px;
+        padding-left: 80px;
+        text-align: center;
+        border: solid transparent;
+        font-family: Poppins;
+        }
+        #button_2 {
+        background-color: #1D4ED8;
+        color: white;
+        border: solid transparent;
+        border-radius: 6px;
+        height: 40px;
+        padding-right: 70px;
+        padding-left: 70px;
+        font-family: Poppins;
+        }
+        .second_section {
+        margin-top: 60px;
+        }
+        a {
+        font-weight: 600;
+        }
+        .images-section {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: -25px;
+        }
+        .images-section img {
+        margin-right: 15px;
+        margin-left: 25px;
+        }
+        .image-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+        }
+        .print-section {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: -25px;
+        }
+        .print-section img {
+        margin-right: 10px;
+        }
+        .print-text {
+        color: #1D4ED8;
+        font-size: 18px;
+        font-weight: bold;
+        font-family: Poppins;
+        }
+        .details-container {
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin: 20px;
+        margin-right: -20px;
+        width: calc(100% - 80px);
+        }
+
+        .details-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        }
+
+        .details-list li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 0;
+        font-family: Poppins;
+        }
+
+        .details-list li:not(:last-child) {
+        border-bottom: 1px dashed #ddd;
+        padding-bottom: 20px;
+        }
+
+        .icon {
+        margin-right: 10px;
+        width: 24px;
+        height: 24px;
+        }
+
+        .details-content {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        }
+
+        .details-text {
+        font-weight: bold;
+        }
+
+        .details-description {
+        font-weight: normal;
+        color: #666;
+        }
+        .separator {
+        border: 0;
+        border-top: 1px solid #ddd;
+        margin: 20px 0;
+        }
+
+        .cancel-button {
+        display: block;
+        width: 250px;
+        margin: 20px auto 0;
+        font-family: Poppins;
+        background-color: #1D4ED8;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        padding: 10px 30px;
+        cursor: pointer;
+        text-align: center;
+        font-weight: bold;
+        }
