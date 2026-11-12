@@ -161,7 +161,7 @@ router.get("/all", accessControl(["super_admin"]), userController.allUsers);
 router.get(
   "/profile",
   accessControl(["owner", "super_admin", "sales", "receptionist"]),
-  userController.profile
+  userController.profile,
 );
 /**
  * @swagger
@@ -184,7 +184,7 @@ router.get(
 router.get(
   "/my_receptionists",
   accessControl(["owner"]),
-  userController.myReceptionists
+  userController.myReceptionists,
 );
 /**
  * @swagger
@@ -208,7 +208,7 @@ router.get(
 router.get(
   "/logout",
   accessControl(["receptionist", "owner", "sales", "super_admin"]),
-  authController.logout
+  authController.logout,
 );
 /**
  * @swagger
@@ -281,12 +281,12 @@ router.get("/:id", accessControl(["super_admin"]), userController.getUser);
 router.get(
   "/password_reset/:id",
   accessControl(["super_admin"]),
-  userController.resetPass
+  userController.resetPass,
 );
 router.post(
   "/generate_firebase_token",
   accessControl(["admin", "super_admin"]),
-  userController.firebase_token
+  userController.firebase_token,
 );
 router.post("/Users", authController.customerslogin);
 /**
@@ -376,7 +376,7 @@ router.post("/login", authController.login);
 router.post(
   "/createAdmin",
   accessControl(["super_admin"]),
-  userController.createAdmin
+  userController.createAdmin,
 );
 /**
  * @swagger
@@ -521,7 +521,7 @@ router.post("/create_system_admin", userController.signup);
 router.post(
   "/checkPhone",
   accessControl(["admin", "super_admin"]),
-  userController.checkPhone
+  userController.checkPhone,
 );
 /**
  * @swagger
@@ -578,14 +578,15 @@ router.post(
 router.post(
   "/create_reception",
   accessControl(["owner"]),
-  userController.create_reception
+  userController.create_reception,
 );
 router.post("/forgot_password", userController.forgotPassword);
+router.post("/request-delete", userController.requestDeleteAccount);
 router.param("id", userController.validateUser);
 router.put(
   "/changeRole",
   accessControl(["admin", "super_admin"]),
-  userController.changeRole
+  userController.changeRole,
 );
 /**
  * @swagger
@@ -683,7 +684,7 @@ router.put("/password/update", userController.passwordChange);
 router.put(
   "/:id",
   accessControl(["admin", "super_admin"]),
-  userController.updateUser
+  userController.updateUser,
 );
 /**
  * @swagger
@@ -730,7 +731,7 @@ router.put(
 router.put(
   "/password/:id",
   accessControl(["super_admin"]),
-  userController.updateUserPass
+  userController.updateUserPass,
 );
 /**
  * @swagger
@@ -767,8 +768,9 @@ router.put(
 router.delete(
   "/:id/remove_receptionist",
   accessControl(["owner"]),
-  userController.removeReceptionist
+  userController.removeReceptionist,
 );
+
 /**
  * @swagger
  * /user/{uid}:
@@ -804,7 +806,7 @@ router.delete(
 router.delete(
   "/:id",
   accessControl(["super_admin"]),
-  userController.removeUser
+  userController.removeUser,
 );
 
 module.exports = router;
