@@ -129,7 +129,7 @@ const router = express.Router();
 router.get(
   "/admin/show",
   accessControl(["super_admin", "sales"]),
-  ClientController.fetch
+  ClientController.fetch,
 );
 /**
  * @swagger
@@ -213,7 +213,7 @@ router.get("/verify", ClientController.verifyEmail);
 router.get(
   "/:id",
   accessControl(["super_admin", "sales", "owner", "receptionist"]),
-  ClientController.fetchOne
+  ClientController.fetchOne,
 );
 /**
  * @swagger
@@ -334,6 +334,7 @@ router.param("id", ClientController.validateClient);
  *                 $ref: '#/components/schemas/clientError'
  */
 router.put("/:id", firebaseAuth, ClientController.update);
+router.delete("/:id/remove_guests/:otp", ClientController.removeGuests);
 /**
  * @swagger
  * /client/{did}:
@@ -369,7 +370,7 @@ router.put("/:id", firebaseAuth, ClientController.update);
 router.delete(
   "/:id",
   accessControl(["super_admin"]),
-  ClientController.deleteClient
+  ClientController.deleteClient,
 );
 
 // Expose User Router

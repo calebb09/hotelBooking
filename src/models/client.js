@@ -46,6 +46,11 @@ var ClientSchema = new Schema({
   email_notification: {
     news_update: {type: Boolean, default: true},
   },
+  request_delete_account: {type: Boolean, default: false},
+  otp: {
+    type: String,
+    default: null,
+  },
   created_at: {type: Date, default: Date.now},
   updated_at: {type: Date},
 });

@@ -1,6 +1,7 @@
 // Load Module Dependencies
 const events = require("events");
 const debug = require("debug")("api-user");
+const firebaseAdmin = require("firebase-admin");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const config = require("../../config");
@@ -9,6 +10,7 @@ const UserModel = require("../models/user");
 const UserDal = require("../dal/user");
 const InternalDal = require("../dal/internal");
 const ClientDal = require("../dal/client");
+const Client = require("../models/client");
 const sendMessage = require("../functions/sendMessage");
 const mongoose = require("mongoose");
 exports.validateUser = function validateUser(req, res, next, id) {
@@ -37,7 +39,7 @@ exports.validateUser = function validateUser(req, res, next, id) {
           msg: "User _id " + id + " not found",
         });
       }
-    }
+    },
   );
 };
 exports.getUserInfo = function (req, res, next) {
@@ -80,7 +82,7 @@ exports.allUsers = function allUsers(req, res, next) {
         skip: page,
         total: doc.total,
       });
-    }
+    },
   );
 };
 exports.profile = (req, res, next) => {
@@ -113,14 +115,14 @@ exports.myReceptionists = (req, res, next) => {
         return next(err);
       }
       res.status(200).json(users_doc);
-    }
+    },
   );
 };
 exports.firebase_token = function generateToken(req, res, next) {
   var body = req.body;
   var FirebaseTokenGenerator = require("firebase-token-generator");
   var tokenGenerator = new FirebaseTokenGenerator(
-    "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCsMUXevHPxBCkT\nc8TSwVLVCoDCFrF/cGyH+IzDvGzyQOflGj7i41QlkVnoE/OCZ4jdJpYjLWW/WfN0\nCXt8Cmb8OBaKhNIWKuZ8suXJZ5jiV3Ui78iyKnEgjcsn/t2sI7gC0fLfApmdXgZv\nZ/LvLrf6q3zvBCttlVFsrWvrAG9Tg9SvonELcskWJAXZa2z7OPd0g1ZHTRjGHF0r\nJtSxSjUqevJ69hUXQxmRNdn28onrUwSFnqfxZ0Lij/qyCS8EunK0bjFDCR499U4G\n3+EKymmNKhZubcMayrJOrEPPaAAn1LxNfhKdrhX1Y6oWUH40LwelOEtB9qSL4CGe\nmaT+CW+9AgMBAAECggEACtTOSWiPHiKYnIZho68w8RaIIGKnN3YLLFIPCrNEIsiV\n6FRKZIu6Vo2fez4hXmXPAbg5uqHnqU3KHFW0sd9WozgPpOweFJ0ODVspzKLgBqF2\njGQgZU1O+zuoGI6LLkGQmNl7fpnY2gGuLnJPtp9jR8ON6DFZ3lAFmewzt7R54ZB0\noi7kgSMG+6dk37zpMmz59V4DMdWI7Zyl7h/aYzqaFcCRFo+qpAnwdTzmtJgwOhvF\nPfXnH6ljoF+9YjlkU9oz8KbLu5tk7AmnOJNca6fUeVUKbqZeW6TV4wJ+9PklEz8j\nmpV3bScocz1f0qbdC32f+ZlUsUpqAUnnIcpO9me88QKBgQDtjcWXZCcU5clTRHQi\nyZ9j87Z/ciZafBuNiXIPOHIJpmR30VKzipSzNgjIgwgoIq6BjjetQb7Qs18Efe9U\n77pwL1E0fWfhUB11P37QNVk4Cozz5+xKeR3c/Bj4NihSWaLFWydzauwx683b3juB\nYij8TYmWPX1Cnve3byd7sws2zQKBgQC5kDY9uu1zOLgvyCTmmKdSqQbjVaGckKrr\nb3CQjuVDisELmvON8sHrgylN6CwivqO7+ZUP65FTvpJf6iThtdSmwvB4H4bIJRTG\ntY0wDE6Z4lwm6t7zf/LBY0w6zCYDZ+9fSSt3njHS6iiAWZAPzlgRzBxA0l+6N+Nt\nBlWoTzK8sQKBgQCk6DENumni+O18j12rtJmgclPzPxPe5p7d71ctt7p6dnbyMm6d\n0osNqWoJf+TOr9zCdS6zaJuFF6/TV3UoWk7rh/1wWcoeQFZiyVRIR3CLFc/plcuT\nm2aevKa80CPHnw/+vxuw5L3YneBHTIu0cqcPFuh3UnI9KEvAnDolhhI31QKBgAyo\nD2sKcuOm/LkVl566zr7OlI+w6YL6Qw4n3a+eb3i54AzglrgZ1KwxmAGeUlRUWGqb\nzVT2pkTl/KnaGIXklwqAxVIMJG9GSDJ9c5HRZRMN42csIeTN10rlcO+ZuQYGcsc3\nAGX6Pj+6hOSsNy08z7j3CP5K2wiigzqOcg02yakhAoGBAJHpyvawfam+iRFkbXKO\nKQEK1zzP/hIOgkIgc4oX4lS5bz+re7t1DkOdEsJF1bPS5dFtaiZYooUB9/57Z+Eb\nIFNWTRqjQ1zijPlyIQKl7+SzO1HoTb/lPXKwtxkFD+Ek14aS8NhCDsWDdneRv1fI\nt6JQfGHLUleKpPJWiBOsZlzj"
+    "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCsMUXevHPxBCkT\nc8TSwVLVCoDCFrF/cGyH+IzDvGzyQOflGj7i41QlkVnoE/OCZ4jdJpYjLWW/WfN0\nCXt8Cmb8OBaKhNIWKuZ8suXJZ5jiV3Ui78iyKnEgjcsn/t2sI7gC0fLfApmdXgZv\nZ/LvLrf6q3zvBCttlVFsrWvrAG9Tg9SvonELcskWJAXZa2z7OPd0g1ZHTRjGHF0r\nJtSxSjUqevJ69hUXQxmRNdn28onrUwSFnqfxZ0Lij/qyCS8EunK0bjFDCR499U4G\n3+EKymmNKhZubcMayrJOrEPPaAAn1LxNfhKdrhX1Y6oWUH40LwelOEtB9qSL4CGe\nmaT+CW+9AgMBAAECggEACtTOSWiPHiKYnIZho68w8RaIIGKnN3YLLFIPCrNEIsiV\n6FRKZIu6Vo2fez4hXmXPAbg5uqHnqU3KHFW0sd9WozgPpOweFJ0ODVspzKLgBqF2\njGQgZU1O+zuoGI6LLkGQmNl7fpnY2gGuLnJPtp9jR8ON6DFZ3lAFmewzt7R54ZB0\noi7kgSMG+6dk37zpMmz59V4DMdWI7Zyl7h/aYzqaFcCRFo+qpAnwdTzmtJgwOhvF\nPfXnH6ljoF+9YjlkU9oz8KbLu5tk7AmnOJNca6fUeVUKbqZeW6TV4wJ+9PklEz8j\nmpV3bScocz1f0qbdC32f+ZlUsUpqAUnnIcpO9me88QKBgQDtjcWXZCcU5clTRHQi\nyZ9j87Z/ciZafBuNiXIPOHIJpmR30VKzipSzNgjIgwgoIq6BjjetQb7Qs18Efe9U\n77pwL1E0fWfhUB11P37QNVk4Cozz5+xKeR3c/Bj4NihSWaLFWydzauwx683b3juB\nYij8TYmWPX1Cnve3byd7sws2zQKBgQC5kDY9uu1zOLgvyCTmmKdSqQbjVaGckKrr\nb3CQjuVDisELmvON8sHrgylN6CwivqO7+ZUP65FTvpJf6iThtdSmwvB4H4bIJRTG\ntY0wDE6Z4lwm6t7zf/LBY0w6zCYDZ+9fSSt3njHS6iiAWZAPzlgRzBxA0l+6N+Nt\nBlWoTzK8sQKBgQCk6DENumni+O18j12rtJmgclPzPxPe5p7d71ctt7p6dnbyMm6d\n0osNqWoJf+TOr9zCdS6zaJuFF6/TV3UoWk7rh/1wWcoeQFZiyVRIR3CLFc/plcuT\nm2aevKa80CPHnw/+vxuw5L3YneBHTIu0cqcPFuh3UnI9KEvAnDolhhI31QKBgAyo\nD2sKcuOm/LkVl566zr7OlI+w6YL6Qw4n3a+eb3i54AzglrgZ1KwxmAGeUlRUWGqb\nzVT2pkTl/KnaGIXklwqAxVIMJG9GSDJ9c5HRZRMN42csIeTN10rlcO+ZuQYGcsc3\nAGX6Pj+6hOSsNy08z7j3CP5K2wiigzqOcg02yakhAoGBAJHpyvawfam+iRFkbXKO\nKQEK1zzP/hIOgkIgc4oX4lS5bz+re7t1DkOdEsJF1bPS5dFtaiZYooUB9/57Z+Eb\nIFNWTRqjQ1zijPlyIQKl7+SzO1HoTb/lPXKwtxkFD+Ek14aS8NhCDsWDdneRv1fI\nt6JQfGHLUleKpPJWiBOsZlzj",
   );
   var token = tokenGenerator.createToken(body);
   res.status(200).json({
@@ -175,12 +177,12 @@ exports.resetPass = function resetPass(req, res, next) {
                     msg: "password reset successful",
                     status: 200,
                   });
-                }
+                },
               );
             });
           });
       }
-    }
+    },
   );
 };
 exports.createAdmin = function createAdmin(req, res, next) {
@@ -272,15 +274,15 @@ exports.createAdmin = function createAdmin(req, res, next) {
                         msg: "You Have successfully created Admin",
                         status: 200,
                       });
-                    }
+                    },
                   );
-                }
+                },
               );
             });
           }
         });
       }
-    }
+    },
   );
 };
 exports.register = function register(req, res, next) {
@@ -346,7 +348,7 @@ exports.register = function register(req, res, next) {
                         if (err) {
                           return next(err);
                         }
-                      }
+                      },
                     );
                     let message = {
                       notification: {
@@ -367,7 +369,7 @@ exports.register = function register(req, res, next) {
                     res
                       .status(200)
                       .json({msg: "successful", data: usr, status: 200});
-                  }
+                  },
                 );
                 /** send message */
               });
@@ -435,12 +437,12 @@ exports.signup = function signup(req, res, next) {
                     msg: "You Have successfully created Super Admin",
                     status: 200,
                   });
-                }
+                },
               );
             });
-          }
+          },
         );
-      }
+      },
     );
   } catch (error) {
     console.log(error);
@@ -512,9 +514,9 @@ exports.create_reception = (req, res, next) => {
                       msg: "successfully created",
                       status: 200,
                     });
-                  }
+                  },
                 );
-              }
+              },
             );
           });
         });
@@ -584,12 +586,45 @@ exports.forgotPassword = function forgotPassword(req, res, next) {
               };
               sendMessage(message, null, null, "to", body.username);
               res.status(200).json({msg: "successful", data: usr, status: 200});
-            }
+            },
           );
         });
       }
-    }
+    },
   );
+};
+exports.requestDeleteAccount = async (req, res) => {
+  try {
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const user = await Client.findOne({email: req.body.email});
+    if (!user) {
+      return res.status(404).json({msg: "User not found", status: 404});
+    }
+    user.request_delete_account = true;
+    user.otp = otp;
+    await user.save();
+    // send email with the otp code
+    let message = {
+      notification: {
+        title: "Account Deletion Request",
+        body: `Dear ${user.full_name}.
+          
+          We have received your request to delete your account. Please use the following OTP code to confirm your request:
+
+          ${otp}
+    
+          Please do not share this code with anyone. Click this link https://triplaye.com/delete-account?email=${user.id}&otp=${otp} to confirm your account deletion request.
+          <hr>
+          If you did not request this, please ignore this message.`,
+      },
+    };
+    sendMessage(message, user.uuid, null, "to", user.email);
+    return res.status(200).json({msg: "OTP sent to your email", status: 200});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({msg: "Internal server error", status: 500});
+    return;
+  }
 };
 exports.changeRole = function changeRole(req, res, next) {
   console.log(req._user._id);
@@ -607,7 +642,7 @@ exports.changeRole = function changeRole(req, res, next) {
       }
       res.status(200);
       res.json(doc);
-    }
+    },
   );
 };
 exports.activateAccount = function activateAccount(req, res, next) {
@@ -693,10 +728,10 @@ exports.activateAccount = function activateAccount(req, res, next) {
                 status: 200,
               });
             }
-          }
+          },
         );
       }
-    }
+    },
   );
 };
 exports.passwordChange = function passwordChange(req, res, next) {
@@ -785,7 +820,7 @@ exports.passwordChange = function passwordChange(req, res, next) {
                           "this.IsAn/.ExampleS3cr3t",
                           {
                             algorithm: "HS256",
-                          }
+                          },
                         );
                         res.status(200).json({
                           msg: "password successfully changed",
@@ -793,9 +828,9 @@ exports.passwordChange = function passwordChange(req, res, next) {
                           status: 200,
                         });
                       }
-                    }
+                    },
                   ); // end of update
-                }
+                },
               ); // end of hash
             }); // end of gensalt
           } else {
@@ -807,7 +842,7 @@ exports.passwordChange = function passwordChange(req, res, next) {
       } else {
         res.status(400).json({msg: "request does not exist", status: 400});
       }
-    }
+    },
   );
 };
 exports.updateUser = function updateUser(req, res, next) {
@@ -838,10 +873,10 @@ exports.updateUser = function updateUser(req, res, next) {
               return next(err);
             }
             res.json(doc);
-          }
+          },
         );
       }
-    }
+    },
   );
 };
 exports.updateUserPass = function updateUserPass(req, res, next) {
@@ -868,7 +903,7 @@ exports.updateUserPass = function updateUserPass(req, res, next) {
           if (err) {
             return next(err);
           }
-        }
+        },
       ); // end of update
     }); // end of hash
   }); // end of gensalt
@@ -898,18 +933,19 @@ exports.removeReceptionist = (req, res, next) => {
                 if (err) {
                   return next(err);
                 }
-              }
+              },
             );
             remove_document
               ? res.status(200).json({msg: "removed successfully"})
               : res.status(400).json({msg: "not removed"});
-          }
+          },
         )
       : res.status(401).json({msg: "unauthorized role"});
   } catch (err) {
     res.status(500).json(err);
   }
 };
+
 exports.removeUser = function removeUser(req, res, next) {
   UserDal.delete(
     {
@@ -928,10 +964,10 @@ exports.removeUser = function removeUser(req, res, next) {
             if (err) {
               return next(err);
             }
-          }
+          },
         );
       }
       res.status(200).json(doc);
-    }
+    },
   );
 };

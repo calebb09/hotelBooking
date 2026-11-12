@@ -30,7 +30,7 @@ exports.validateClient = function Client(req, res, next, id) {
           msg: "ClientDal _id " + id + " not found",
         });
       }
-    }
+    },
   );
 };
 exports.fetch = (req, res, next) => {
@@ -123,7 +123,7 @@ exports.verifyEmail = (req, res, next) => {
             res.status(200).json({
               msg: "Successful",
             });
-          }
+          },
         )
       : res.status(400).json({msg: "unknown emailId"});
   });
@@ -193,7 +193,7 @@ exports.register = (req, res, next) => {
             } else {
               await Client.updateOne(
                 {_id: create_doc.id},
-                {account_created_with_email: true, updated_at: new Date()}
+                {account_created_with_email: true, updated_at: new Date()},
               );
               /** send email */
               var reset_link_address = "https://triplaye.com/auth/verify-email";
@@ -233,7 +233,7 @@ exports.saveLocation = async (req, res) => {
         const updateLocation = await Location.findOneAndUpdate(
           {_id: checkLocation[0].id},
           {$set: {location: body.location}}, // Update the location field,
-          {new: true}
+          {new: true},
         );
         console.log(updateLocation);
         updateLocation
@@ -290,12 +290,33 @@ exports.deleteClient = async (req, res, next) => {
                 });
               });
             }
-          }
+          },
         );
         removed_doc
           ? res.status(200).json({msg: "client removed"})
           : res.status(400).json({msg: "client not removed"});
-      })
+      }),
     )
     .catch((error) => console.log("error deleting user from firebase:", error));
+};
+exports.removeGuests = async (req, res, next) => {
+  try {
+    const user = await Client.findOne({
+      _id: req.params.id,
+      otp: req.params.otp,
+      request_delete_account: true,
+    });
+    if (!user) {
+      return res.status(404).json({msg: "User not found"});
+    }
+    await Client.findOneAndDelete({_id: req.params.id});
+    // remove user from firebase authentication
+    firebase.auth().deleteUser(user.uuid);
+    res.status(200).json({msg: "User removed successfully"});
+    return;
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({msg: "Internal server error", error: err});
+    return;
+  }
 };
